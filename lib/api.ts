@@ -98,3 +98,18 @@ export const nutrientsApi = {
   delete: (id: string) => fetchApi<any>(`/nutrients/${id}`, { method: 'DELETE' }),
   byProduct: (id: string) => fetchApi<any[]>(`/nutrients/product/${id}`),
 }
+// Flat table (FK dereferenced) — удобно для селекторов
+export const tableApi = {
+  products: (limit = 1000) => fetchApi<any[]>(`/table/products?limit=${limit}`),
+}
+
+// Калькулятор пищевой и биологической ценности
+export interface CalcItem { product_id: string; amount_g: number }
+export interface CalcRequest { reference_protein_id: string; items: CalcItem[] }
+
+export const calculatorApi = {
+  referenceProteins: () => fetchApi<any[]>('/calculator/reference-proteins'),
+  recipes: () => fetchApi<any[]>('/calculator/recipes'),
+  compute: (body: CalcRequest) =>
+    fetchApi<any>('/calculator/compute', { method: 'POST', body: JSON.stringify(body) }),
+}
