@@ -1,7 +1,37 @@
 import Link from 'next/link'
-import { Database, Calculator, FlaskConical, MapPin, ArrowRight, Leaf } from 'lucide-react'
+import {
+  Database, Calculator, FlaskConical, MapPin, ArrowRight, Leaf, Bookmark, Sparkles,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
+// Основные инструменты приложения (требуют входа). Карточки кликабельны.
+const tools = [
+  {
+    icon: Calculator,
+    title: 'Калькулятор ценности',
+    description: 'Расчёт пищевой и биологической ценности рецептуры по методике Липатова: '
+      + 'макросостав, аминокислотный скор, БЦ, КРАС, V и G.',
+    href: '/calculator',
+    cta: 'Открыть калькулятор',
+  },
+  {
+    icon: Bookmark,
+    title: 'Сохранённые рецептуры',
+    description: 'Сохраняйте рецептуры с названием и группируйте их, как плейлисты. '
+      + 'Перемещайте между группами, редактируйте и удаляйте.',
+    href: '/saved-recipes',
+    cta: 'Мои рецептуры',
+  },
+  {
+    icon: Sparkles,
+    title: 'Ранжирование рецептур',
+    description: 'Сравните сохранённые рецептуры и найдите самую оптимальную по показателям '
+      + 'БЦ, КРАС, V и G с градацией от лучшей к худшей.',
+    href: '/optimization',
+    cta: 'Перейти к оптимизации',
+  },
+]
 
 const features = [
   {
@@ -62,8 +92,39 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Инструменты (требуют входа) */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">Инструменты</h2>
+          <p className="mt-3 text-muted-foreground">
+            Калькулятор, сохранённые рецептуры и ранжирование рецептур. Доступны после входа.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
+          {tools.map((tool) => (
+            <Link key={tool.href} href={tool.href} className="group">
+              <Card className="flex h-full flex-col transition-colors group-hover:border-primary/60 group-hover:bg-accent/30">
+                <CardHeader>
+                  <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <tool.icon className="h-6 w-6" />
+                  </div>
+                  <CardTitle className="text-lg">{tool.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-1 flex-col">
+                  <CardDescription className="flex-1">{tool.description}</CardDescription>
+                  <span className="text-primary mt-4 inline-flex items-center text-sm font-medium">
+                    {tool.cta}
+                    <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="border-t border-border mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground">Возможности</h2>
           <p className="mt-3 text-muted-foreground">

@@ -24,11 +24,17 @@ import {
 import { useAuth } from '@/lib/auth-context'
 import { cn } from '@/lib/utils'
 
-const navItems = [
+const baseNavItems = [
   { label: 'Главная', href: '/' },
   { label: 'База данных', href: '/database' },
   { label: 'Калькулятор', href: '/calculator' },
   { label: 'О нас', href: '/about' },
+]
+
+// Доступны только авторизованным пользователям.
+const authNavItems = [
+  { label: 'Мои рецептуры', href: '/saved-recipes' },
+  { label: 'Оптимизация', href: '/optimization' },
 ]
 
 function isActive(pathname: string, href: string) {
@@ -50,6 +56,7 @@ export function SiteHeader() {
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuth()
   const [open, setOpen] = useState(false)
+  const navItems = isAuthenticated ? [...baseNavItems, ...authNavItems] : baseNavItems
 
   const handleLogout = () => {
     logout()

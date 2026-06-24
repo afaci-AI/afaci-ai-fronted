@@ -1,17 +1,33 @@
+// --- Хранение JWT-токена ---
+export const TOKEN_KEY = 'afaci_token'
+
+export function getToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return window.localStorage.getItem(TOKEN_KEY)
+}
+
+export function setToken(token: string | null) {
+  if (typeof window === 'undefined') return
+  if (token) window.localStorage.setItem(TOKEN_KEY, token)
+  else window.localStorage.removeItem(TOKEN_KEY)
+}
+
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const token = getToken()
   const res = await fetch(`/api/v1${endpoint}`, {
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options?.headers,
     },
     ...options,
   })
-  
+
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: 'Request failed' }))
     throw new Error(error.detail || `HTTP ${res.status}`)
   }
-  
+
   return res.json()
 }
 
@@ -112,4 +128,60 @@ export const calculatorApi = {
   recipes: () => fetchApi<any[]>('/calculator/recipes'),
   compute: (body: CalcRequest) =>
     fetchApi<any>('/calculator/compute', { method: 'POST', body: JSON.stringify(body) }),
+}
+
+// Аутентификация
+export interface AuthUser {
+  id: string; email: string; name: string; role: string
+  isActive: boolean; createdAt: string; lastLoginAt?: string | null
+}
+export interface AuthResponse { access_token: string; user: AuthUser }
+
+export const authApi = {
+  register: (data: { email: string; name: string; password: string }) =>
+    fetchApi<AuthResponse>('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+  login: (data: { email: string; password: string }) =>
+    fetchApi<AuthResponse>('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+  me: () => fetchApi<AuthUser>('/auth/me'),
+}
+
+// Сохранённые рецептуры, группы и ранжирование рецептур
+export interface SavedItem { product_id: string; amount_g: number; sort_order?: number }
+export interface SaveRecipeBody {
+  name: string
+  group_id?: string | null
+  new_group_name?: string | null
+  reference_protein_id: string
+  items: SavedItem[]
+  draft?: boolean
+}
+export interface UpdateRecipeBody {
+  name?: string
+  group_id?: string | null
+  reference_protein_id?: string
+  items?: SavedItem[]
+  draft?: boolean
+}
+
+export const savedApi = {
+  groups: () => fetchApi<any[]>('/saved/groups'),
+  createGroup: (data: { name: string }) =>
+    fetchApi<any>('/saved/groups', { method: 'POST', body: JSON.stringify(data) }),
+  updateGroup: (id: string, data: { name: string }) =>
+    fetchApi<any>(`/saved/groups/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteGroup: (id: string) =>
+    fetchApi<any>(`/saved/groups/${id}`, { method: 'DELETE' }),
+
+  recipes: (groupId?: string) =>
+    fetchApi<any[]>(`/saved/recipes${groupId ? `?group_id=${groupId}` : ''}`),
+  recipe: (id: string) => fetchApi<any>(`/saved/recipes/${id}`),
+  createRecipe: (body: SaveRecipeBody) =>
+    fetchApi<any>('/saved/recipes', { method: 'POST', body: JSON.stringify(body) }),
+  updateRecipe: (id: string, body: UpdateRecipeBody) =>
+    fetchApi<any>(`/saved/recipes/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteRecipe: (id: string) =>
+    fetchApi<any>(`/saved/recipes/${id}`, { method: 'DELETE' }),
+
+  optimize: (body: { recipe_ids: string[]; weights?: { bc: number; kras: number; v: number; g: number } }) =>
+    fetchApi<any>('/saved/optimize', { method: 'POST', body: JSON.stringify(body) }),
 }

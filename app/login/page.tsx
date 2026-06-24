@@ -1,59 +1,49 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Database, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FieldGroup, Field, FieldLabel, FieldMessage } from '@/components/ui/field'
 import { useAuth } from '@/lib/auth-context'
 
-export default function LoginPage() {
+function LoginInner() {
+  const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const { login } = useAuth()
+  const { login, register } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next') || '/calculator'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setIsLoading(true)
-
     try {
-      const success = await login(email, password)
+      const success = mode === 'login'
+        ? await login(email, password)
+        : await register(email, name, password)
       if (success) {
-        router.push('/dashboard')
+        router.push(next)
       } else {
-        setError('Неверный email или пароль')
+        setError(
+          mode === 'login'
+            ? 'Неверный email или пароль'
+            : 'Не удалось зарегистрироваться. Возможно, email уже занят или пароль короче 6 символов.',
+        )
       }
     } catch {
       setError('Произошла ошибка. Попробуйте позже.')
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleDemoLogin = async (role: 'admin' | 'editor' | 'viewer') => {
-    const emails = {
-      admin: 'admin@example.com',
-      editor: 'editor@example.com',
-      viewer: 'viewer@example.com',
-    }
-    setEmail(emails[role])
-    setPassword('demo')
-    setIsLoading(true)
-    
-    const success = await login(emails[role], 'demo')
-    if (success) {
-      router.push('/dashboard')
-    }
-    setIsLoading(false)
   }
 
   return (
@@ -63,14 +53,33 @@ export default function LoginPage() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Database className="h-6 w-6" />
           </div>
-          <CardTitle className="text-2xl">База Продуктов</CardTitle>
+          <CardTitle className="text-2xl">
+            {mode === 'login' ? 'Вход в AFACI' : 'Регистрация'}
+          </CardTitle>
           <CardDescription>
-            Войдите в систему для управления базой данных
+            {mode === 'login'
+              ? 'Войдите, чтобы пользоваться калькулятором и сохранять рецептуры'
+              : 'Создайте аккаунт для доступа к калькулятору и сохранённым рецептурам'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <FieldGroup>
+              {mode === 'register' && (
+                <Field>
+                  <FieldLabel htmlFor="name">Имя</FieldLabel>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Как к вам обращаться"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
+                </Field>
+              )}
+
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
@@ -90,10 +99,11 @@ export default function LoginPage() {
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Введите пароль"
+                    placeholder={mode === 'register' ? 'Минимум 6 символов' : 'Введите пароль'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    minLength={6}
                     disabled={isLoading}
                     className="pr-10"
                   />
@@ -115,79 +125,52 @@ export default function LoginPage() {
               </Field>
             </FieldGroup>
 
-            {error && (
-              <FieldMessage variant="error">{error}</FieldMessage>
-            )}
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="remember"
-                  checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(checked === true)}
-                  disabled={isLoading}
-                />
-                <label htmlFor="remember" className="text-sm text-muted-foreground cursor-pointer">
-                  Запомнить меня
-                </label>
-              </div>
-              <Button type="button" variant="link" className="px-0 text-sm">
-                Забыли пароль?
-              </Button>
-            </div>
+            {error && <FieldMessage variant="error">{error}</FieldMessage>}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Вход...' : 'Войти'}
+              {isLoading
+                ? (mode === 'login' ? 'Вход...' : 'Регистрация...')
+                : (mode === 'login' ? 'Войти' : 'Зарегистрироваться')}
             </Button>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Демо доступ
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => handleDemoLogin('admin')}
-                disabled={isLoading}
-                className="text-xs"
-              >
-                Админ
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => handleDemoLogin('editor')}
-                disabled={isLoading}
-                className="text-xs"
-              >
-                Редактор
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => handleDemoLogin('viewer')}
-                disabled={isLoading}
-                className="text-xs"
-              >
-                Аналитик
-              </Button>
-            </div>
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            {mode === 'login' ? (
+              <>
+                Нет аккаунта?{' '}
+                <Button
+                  type="button"
+                  variant="link"
+                  className="px-1"
+                  onClick={() => { setMode('register'); setError('') }}
+                >
+                  Зарегистрироваться
+                </Button>
+              </>
+            ) : (
+              <>
+                Уже есть аккаунт?{' '}
+                <Button
+                  type="button"
+                  variant="link"
+                  className="px-1"
+                  onClick={() => { setMode('login'); setError('') }}
+                >
+                  Войти
+                </Button>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginInner />
+    </Suspense>
   )
 }
