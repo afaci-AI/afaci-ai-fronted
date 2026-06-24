@@ -1,90 +1,105 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import type { User, UserRole } from './types'
+import { authApi, getToken, setToken, type AuthUser } from './api'
 
 interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
+  isLoading: boolean
   login: (email: string, password: string) => Promise<boolean>
+  register: (email: string, name: string, password: string) => Promise<boolean>
   logout: () => void
   switchRole: (role: UserRole) => void
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
+const USER_KEY = 'afaci_user'
 
-// Demo users for testing different roles
-const demoUsers: Record<string, User> = {
-  'admin@example.com': {
-    id: '1',
-    email: 'admin@example.com',
-    name: 'Администратор',
-    role: 'admin',
-    isActive: true,
-    createdAt: '2024-01-15T10:00:00Z',
-    lastLoginAt: '2024-03-20T14:30:00Z',
-  },
-  'editor@example.com': {
-    id: '2',
-    email: 'editor@example.com',
-    name: 'Редактор Иванов',
-    role: 'editor',
-    isActive: true,
-    createdAt: '2024-02-01T09:00:00Z',
-    lastLoginAt: '2024-03-19T11:20:00Z',
-  },
-  'viewer@example.com': {
-    id: '3',
-    email: 'viewer@example.com',
-    name: 'Аналитик Петров',
-    role: 'viewer',
-    isActive: true,
-    createdAt: '2024-02-15T08:00:00Z',
-    lastLoginAt: '2024-03-18T09:45:00Z',
-  },
+function toUser(u: AuthUser): User {
+  return {
+    id: u.id,
+    email: u.email,
+    name: u.name,
+    role: (u.role as UserRole) ?? 'viewer',
+    isActive: u.isActive,
+    createdAt: u.createdAt,
+    lastLoginAt: u.lastLoginAt ?? undefined,
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const login = useCallback(async (email: string, _password: string): Promise<boolean> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    const demoUser = demoUsers[email.toLowerCase()]
-    if (demoUser) {
-      setUser(demoUser)
-      return true
+  // Восстановление сессии при загрузке: токен + кэш пользователя, затем проверка /me.
+  useEffect(() => {
+    const token = getToken()
+    if (!token) {
+      setIsLoading(false)
+      return
     }
-    
-    // For demo, accept any email with password "demo"
-    if (_password === 'demo') {
-      setUser({
-        id: '999',
-        email,
-        name: email.split('@')[0],
-        role: 'viewer',
-        isActive: true,
-        createdAt: new Date().toISOString(),
+    const cached = typeof window !== 'undefined' ? window.localStorage.getItem(USER_KEY) : null
+    if (cached) {
+      try { setUser(JSON.parse(cached)) } catch { /* ignore */ }
+    }
+    authApi.me()
+      .then((u) => {
+        const mapped = toUser(u)
+        setUser(mapped)
+        window.localStorage.setItem(USER_KEY, JSON.stringify(mapped))
       })
-      return true
-    }
-    
-    return false
+      .catch(() => {
+        // токен недействителен — выходим
+        setToken(null)
+        window.localStorage.removeItem(USER_KEY)
+        setUser(null)
+      })
+      .finally(() => setIsLoading(false))
   }, [])
 
+  const persist = useCallback((token: string, u: AuthUser) => {
+    setToken(token)
+    const mapped = toUser(u)
+    setUser(mapped)
+    window.localStorage.setItem(USER_KEY, JSON.stringify(mapped))
+  }, [])
+
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+    try {
+      const res = await authApi.login({ email, password })
+      persist(res.access_token, res.user)
+      return true
+    } catch {
+      return false
+    }
+  }, [persist])
+
+  const register = useCallback(async (email: string, name: string, password: string): Promise<boolean> => {
+    try {
+      const res = await authApi.register({ email, name, password })
+      persist(res.access_token, res.user)
+      return true
+    } catch {
+      return false
+    }
+  }, [persist])
+
   const logout = useCallback(() => {
+    setToken(null)
+    if (typeof window !== 'undefined') window.localStorage.removeItem(USER_KEY)
     setUser(null)
   }, [])
 
   const switchRole = useCallback((role: UserRole) => {
-    if (user) {
-      setUser({ ...user, role })
-    }
-  }, [user])
+    setUser((prev) => (prev ? { ...prev, role } : prev))
+  }, [])
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, switchRole }}>
+    <AuthContext.Provider
+      value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, switchRole }}
+    >
       {children}
     </AuthContext.Provider>
   )
