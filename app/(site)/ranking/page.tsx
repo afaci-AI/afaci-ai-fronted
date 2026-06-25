@@ -24,7 +24,7 @@ function nf(n: number | null | undefined, d = 1): string {
   return n.toLocaleString('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d })
 }
 
-export default function OptimizationPage() {
+export default function RankingPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
 
@@ -36,7 +36,7 @@ export default function OptimizationPage() {
   const [result, setResult] = useState<any>(null)
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) router.replace('/login?next=/optimization')
+    if (!authLoading && !isAuthenticated) router.replace('/login?next=/ranking')
   }, [authLoading, isAuthenticated, router])
 
   const load = useCallback(async () => {
@@ -56,7 +56,7 @@ export default function OptimizationPage() {
   }, [isAuthenticated, load])
 
   const groupName = (id: string | null) => groups.find((g) => g.id === id)?.name ?? null
-  // В оптимизации участвуют только рассчитанные рецептуры (у черновиков нет показателей).
+  // В ранжировании участвуют только рассчитанные рецептуры (у черновиков нет показателей).
   const computable = recipes.filter((r) => r.metrics?.bc != null)
   const draftCount = recipes.length - computable.length
   const selectedIds = Object.keys(selected).filter((id) => selected[id])
@@ -75,11 +75,11 @@ export default function OptimizationPage() {
     }
     setRunning(true)
     try {
-      const res = await savedApi.optimize({ recipe_ids: selectedIds })
+      const res = await savedApi.ranking({ recipe_ids: selectedIds })
       setResult(res)
-      setTimeout(() => document.getElementById('opt-results')?.scrollIntoView({ behavior: 'smooth' }), 50)
+      setTimeout(() => document.getElementById('ranking-results')?.scrollIntoView({ behavior: 'smooth' }), 50)
     } catch (e: any) {
-      toast.error('Оптимизация не выполнена', { description: e.message })
+      toast.error('Ранжирование не выполнено', { description: e.message })
     } finally {
       setRunning(false)
     }
@@ -109,7 +109,7 @@ export default function OptimizationPage() {
             Ранжирование рецептур
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Выберите сохранённые рецептуры — программа найдёт самую оптимальную по показателям
+            Выберите сохранённые рецептуры — программа определит лучшую по показателям
             БЦ, КРАС, V и G и построит градацию от лучшей к худшей.
           </p>
         </div>
@@ -125,7 +125,7 @@ export default function OptimizationPage() {
       ) : computable.length < 2 ? (
         <Card>
           <CardContent className="text-muted-foreground py-16 text-center">
-            Для оптимизации нужно минимум две рассчитанные рецептуры. Сейчас их{' '}
+            Для ранжирования нужно минимум две рассчитанные рецептуры. Сейчас их{' '}
             {computable.length}
             {draftCount > 0 && ` (черновиков без расчёта: ${draftCount})`}. Сохраните рецептуры с
             расчётом в{' '}
@@ -152,7 +152,7 @@ export default function OptimizationPage() {
                   <Button onClick={run} disabled={running || selectedIds.length < 2}>
                     {running
                       ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Расчёт…</>
-                      : <><Sparkles className="mr-2 h-4 w-4" /> Выбрать самую оптимальную рецептуру</>}
+                      : <><Sparkles className="mr-2 h-4 w-4" /> Ранжировать рецептуры</>}
                   </Button>
                 </div>
               </div>
@@ -190,11 +190,11 @@ export default function OptimizationPage() {
 
           {/* Результаты */}
           {result && winner && (
-            <div id="opt-results" className="space-y-6">
+            <div id="ranking-results" className="space-y-6">
               <Card className="border-primary/40 bg-primary/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Trophy className="h-5 w-5 text-primary" /> Самая оптимальная рецептура
+                    <Trophy className="h-5 w-5 text-primary" /> Лучшая рецептура
                   </CardTitle>
                 </CardHeader>
                 <CardContent>

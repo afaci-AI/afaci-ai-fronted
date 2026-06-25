@@ -34,7 +34,7 @@ const baseNavItems = [
 // Доступны только авторизованным пользователям.
 const authNavItems = [
   { label: 'Мои рецептуры', href: '/saved-recipes' },
-  { label: 'Оптимизация', href: '/optimization' },
+  { label: 'Ранжирование', href: '/ranking' },
 ]
 
 function isActive(pathname: string, href: string) {
