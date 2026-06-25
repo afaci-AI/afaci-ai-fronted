@@ -126,7 +126,7 @@ export default function SavedRecipesPage() {
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
-            <Link href="/optimization"><Sparkles className="mr-1.5 h-4 w-4" /> Оптимизация</Link>
+            <Link href="/ranking"><Sparkles className="mr-1.5 h-4 w-4" /> Ранжирование</Link>
           </Button>
           <Button asChild>
             <Link href="/calculator"><Calculator className="mr-1.5 h-4 w-4" /> В калькулятор</Link>
