@@ -110,7 +110,7 @@ export default function RankingPage() {
           </h1>
           <p className="mt-2 text-muted-foreground">
             Выберите сохранённые рецептуры — программа определит лучшую по показателям
-            БЦ, КРАС, V и G и построит градацию от лучшей к худшей.
+            БЦ, КРАС, U и G и построит градацию от лучшей к худшей.
           </p>
         </div>
         <Button asChild variant="outline">
@@ -179,7 +179,7 @@ export default function RankingPage() {
                       </div>
                       <div className="text-muted-foreground mt-0.5 text-xs">
                         БЦ {nf(r.metrics?.bc)} · КРАС {nf(r.metrics?.kras)} ·
-                        V {nf(r.metrics?.V, 2)} · G {nf(r.metrics?.G, 2)}
+                        U {nf(r.metrics?.V, 2)} · G {nf(r.metrics?.G, 2)}
                       </div>
                     </div>
                   </label>
@@ -209,7 +209,7 @@ export default function RankingPage() {
                       <BigMetric label="Балл" value={nf(winner.composite * 100, 0)} accent />
                       <BigMetric label="БЦ, %" value={nf(winner.bc)} />
                       <BigMetric label="КРАС, %" value={nf(winner.kras)} />
-                      <BigMetric label="V" value={nf(winner.V, 2)} />
+                      <BigMetric label="U" value={nf(winner.V, 2)} />
                       <BigMetric label="G" value={nf(winner.G, 2)} />
                     </div>
                   </div>
@@ -221,7 +221,7 @@ export default function RankingPage() {
                 <CardHeader>
                   <CardTitle>Композитный балл (0–100)</CardTitle>
                   <CardDescription>
-                    Нормировка БЦ↑, КРАС↓, V↑, G↓ по выбранным рецептурам, равные веса.
+                    Нормировка БЦ↑, КРАС↓, U↑, G↓ по выбранным рецептурам, равные веса.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -256,7 +256,7 @@ export default function RankingPage() {
                         <TableHead>Рецептура</TableHead>
                         <TableHead className="text-right">БЦ, %</TableHead>
                         <TableHead className="text-right">КРАС, %</TableHead>
-                        <TableHead className="text-right">V</TableHead>
+                        <TableHead className="text-right">U</TableHead>
                         <TableHead className="text-right">G</TableHead>
                         <TableHead className="text-right">Балл</TableHead>
                       </TableRow>
