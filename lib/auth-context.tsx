@@ -11,7 +11,6 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>
   register: (email: string, name: string, password: string) => Promise<boolean>
   logout: () => void
-  switchRole: (role: UserRole) => void
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -93,13 +92,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('afaci:session-expired', handleSessionExpired)
   }, [logout])
 
-  const switchRole = useCallback((role: UserRole) => {
-    setUser((prev) => (prev ? { ...prev, role } : prev))
-  }, [])
-
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, switchRole }}
+      value={{ user, isAuthenticated: !!user, isLoading, login, register, logout }}
     >
       {children}
     </AuthContext.Provider>

@@ -43,7 +43,7 @@ const roleBadgeVariants: Record<UserRole, 'default' | 'secondary' | 'outline'> =
 }
 
 export function AppHeader({ breadcrumbs }: AppHeaderProps) {
-  const { user, logout, switchRole } = useAuth()
+  const { user, logout } = useAuth()
   const router = useRouter()
 
   const handleLogout = () => {
@@ -99,22 +99,6 @@ export function AppHeader({ breadcrumbs }: AppHeaderProps) {
                   <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs text-muted-foreground">
-                Демо: сменить роль
-              </DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => switchRole('admin')}>
-                <Badge variant="default" className="mr-2">Администратор</Badge>
-                {user.role === 'admin' && '✓'}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('editor')}>
-                <Badge variant="secondary" className="mr-2">Редактор</Badge>
-                {user.role === 'editor' && '✓'}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('viewer')}>
-                <Badge variant="outline" className="mr-2">Аналитик</Badge>
-                {user.role === 'viewer' && '✓'}
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
