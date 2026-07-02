@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
 
-# Next.js (App Router) использует SSR + рантайм-rewrites на BACKEND_URL,
+# Next.js (App Router) использует SSR + rewrites на BACKEND_URL (резолвится
+# на этапе `next build`, см. ARG BACKEND_URL ниже — это не рантайм-параметр),
 # поэтому раздать его как чисто статический SPA через nginx нельзя —
 # нужен Node-процесс. Используем `output: "standalone"` (next.config.mjs),
 # что даёт минимальный self-contained рантайм без node_modules целиком.
@@ -16,6 +17,10 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# rewrites() в next.config.mjs резолвится во время `next build`, а не в рантайме —
+# поэтому BACKEND_URL должен быть известен уже на этапе сборки образа.
+ARG BACKEND_URL=http://backend:8000
+ENV BACKEND_URL=$BACKEND_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
