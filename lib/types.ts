@@ -1,4 +1,5 @@
 export type UserRole = 'admin' | 'editor' | 'viewer'
+export type UserStatus = 'active' | 'blocked' | 'expired' | 'unlimited'
 
 export interface User {
   id: string
@@ -6,6 +7,9 @@ export interface User {
   name: string
   role: UserRole
   isActive: boolean
+  accessExpiresAt?: string | null
+  mustChangePassword?: boolean
+  status?: UserStatus
   createdAt: string
   lastLoginAt?: string
 }
