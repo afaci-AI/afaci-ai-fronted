@@ -1,6 +1,6 @@
 import { fetchApi } from '@/shared/api/client'
 
-export interface SavedItem { product_id: string; amount_g: number; sort_order?: number }
+export interface SavedItem { product_id: string; amount_g: number; sort_order?: number; price_per_kg?: number | null }
 export interface SaveRecipeBody {
   name: string
   group_id?: string | null

@@ -21,7 +21,7 @@ export function SaveRecipeDialog({
   referenceProteinId, items, editing, computable = true,
 }: {
   referenceProteinId: string
-  items: { product_id: string; amount_g: number }[]
+  items: { product_id: string; amount_g: number; price_per_kg?: number | null }[]
   editing?: { id: string; name: string; group_id: string | null } | null
   computable?: boolean
 }) {

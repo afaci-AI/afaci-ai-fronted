@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import {
@@ -15,6 +16,7 @@ import {
   ProductCombobox,
   ReferenceInfoButton,
   SaveRecipeDialog,
+  OptimizeCostDialog,
   Results,
   nf,
 } from '@/modules/calculator'
@@ -24,10 +26,11 @@ export default function CalculatorPage() {
     authLoading, isAuthenticated,
     references, refId, setRefId, selectedRef,
     products, recipes,
-    rows, result, loading, computing, editing,
-    sum, sumValid, canCompute, usedIds,
+    rows, result, loading, computing, optimizing, editing,
+    sum, sumValid, canCompute, canOptimize, usedIds,
     REQUIRED_SUM,
-    addRow, removeRow, patchRow, loadExample, reset, compute,
+    costEnabled, setCostEnabled, totalCost,
+    addRow, removeRow, patchRow, loadExample, reset, compute, optimizeCost,
   } = useCalculator()
 
   if (authLoading || !isAuthenticated) {
@@ -95,12 +98,27 @@ export default function CalculatorPage() {
 
               <Separator />
 
+              <div className="flex items-center gap-2">
+                <Switch id="cost-toggle" checked={costEnabled} onCheckedChange={setCostEnabled} />
+                <Label htmlFor="cost-toggle" className="cursor-pointer text-sm">
+                  Рассчитать стоимость сырья
+                </Label>
+              </div>
+
               <div className="space-y-2">
-                <div className="text-muted-foreground grid grid-cols-[1fr_140px_40px] gap-2 px-1 text-xs font-medium uppercase tracking-wide">
-                  <span>Сырьё</span><span>Xᵢ, г</span><span />
+                <div className={cn(
+                  'text-muted-foreground grid gap-2 px-1 text-xs font-medium uppercase tracking-wide',
+                  costEnabled ? 'grid-cols-[1fr_140px_120px_40px]' : 'grid-cols-[1fr_140px_40px]',
+                )}>
+                  <span>Сырьё</span><span>Xᵢ, г</span>
+                  {costEnabled && <span>Цена, сом/г</span>}
+                  <span />
                 </div>
                 {rows.map((row) => (
-                  <div key={row.key} className="grid grid-cols-[1fr_140px_40px] items-center gap-2">
+                  <div key={row.key} className={cn(
+                    'grid items-center gap-2',
+                    costEnabled ? 'grid-cols-[1fr_140px_120px_40px]' : 'grid-cols-[1fr_140px_40px]',
+                  )}>
                     <ProductCombobox
                       value={row.product_id}
                       onChange={(id) => patchRow(row.key, { product_id: id })}
@@ -114,6 +132,14 @@ export default function CalculatorPage() {
                       value={row.amount}
                       onChange={(e) => patchRow(row.key, { amount: e.target.value })}
                     />
+                    {costEnabled && (
+                      <Input
+                        type="number" min="0" step="0.01" inputMode="decimal"
+                        placeholder="0"
+                        value={row.price}
+                        onChange={(e) => patchRow(row.key, { price: e.target.value })}
+                      />
+                    )}
                     <Button
                       variant="ghost" size="icon"
                       onClick={() => removeRow(row.key)}
@@ -130,23 +156,42 @@ export default function CalculatorPage() {
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-muted/30 p-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">Сумма Xᵢ:</span>
-                  <span className={cn('text-lg font-bold tabular-nums', sumValid ? 'text-success' : 'text-destructive')}>
-                    {nf(sum, 2)} / {REQUIRED_SUM} г
-                  </span>
-                  {!sumValid && (
-                    <span className="text-destructive flex items-center gap-1 text-xs">
-                      <AlertTriangle className="h-3.5 w-3.5" /> сумма должна быть ровно 100 г
+                <div className="flex flex-wrap items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Сумма Xᵢ:</span>
+                    <span className={cn('text-lg font-bold tabular-nums', sumValid ? 'text-success' : 'text-destructive')}>
+                      {nf(sum, 2)} / {REQUIRED_SUM} г
                     </span>
+                    {!sumValid && (
+                      <span className="text-destructive flex items-center gap-1 text-xs">
+                        <AlertTriangle className="h-3.5 w-3.5" /> сумма должна быть ровно 100 г
+                      </span>
+                    )}
+                    {sumValid && <Check className="text-success h-4 w-4" />}
+                  </div>
+                  {costEnabled && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-muted-foreground">Стоимость:</span>
+                      <span className="font-bold tabular-nums">
+                        {totalCost !== null ? `${nf(totalCost, 2)} сом / 100 г` : '—'}
+                      </span>
+                    </div>
                   )}
-                  {sumValid && <Check className="text-success h-4 w-4" />}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {editing && (
                     <span className="text-muted-foreground mr-1 text-sm">
                       Правка: <span className="font-medium text-foreground">{editing.name}</span>
                     </span>
+                  )}
+                  {costEnabled && (
+                    <OptimizeCostDialog
+                      rows={rows}
+                      products={products}
+                      canOptimize={canOptimize}
+                      optimizing={optimizing}
+                      onOptimize={optimizeCost}
+                    />
                   )}
                   <SaveRecipeDialog
                     referenceProteinId={refId}
@@ -157,6 +202,9 @@ export default function CalculatorPage() {
                       .map((r) => ({
                         product_id: r.product_id,
                         amount_g: parseFloat(r.amount.replace(',', '.')) || 0,
+                        price_per_kg: costEnabled && r.price !== ''
+                          ? parseFloat(r.price.replace(',', '.')) || null
+                          : null,
                       }))}
                   />
                   <Button onClick={compute} disabled={!canCompute || computing} size="lg">
