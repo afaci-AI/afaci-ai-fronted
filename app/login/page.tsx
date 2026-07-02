@@ -10,14 +10,12 @@ import { FieldGroup, Field, FieldLabel, FieldMessage } from '@/components/ui/fie
 import { useAuth } from '@/lib/auth-context'
 
 function LoginInner() {
-  const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
-  const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const { login, register } = useAuth()
+  const { login } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const next = searchParams.get('next') || '/calculator'
@@ -27,11 +25,7 @@ function LoginInner() {
     setError('')
     setIsLoading(true)
     try {
-      if (mode === 'login') {
-        await login(email, password)
-      } else {
-        await register(email, name, password)
-      }
+      await login(email, password)
       router.push(next)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Произошла ошибка. Попробуйте позже.')
@@ -47,33 +41,14 @@ function LoginInner() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Database className="h-6 w-6" />
           </div>
-          <CardTitle className="text-2xl">
-            {mode === 'login' ? 'Вход в AFACI' : 'Регистрация'}
-          </CardTitle>
+          <CardTitle className="text-2xl">Вход в AFACI</CardTitle>
           <CardDescription>
-            {mode === 'login'
-              ? 'Войдите, чтобы пользоваться калькулятором и сохранять рецептуры'
-              : 'Создайте аккаунт для доступа к калькулятору и сохранённым рецептурам'}
+            Войдите, чтобы пользоваться калькулятором и сохранять рецептуры
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <FieldGroup>
-              {mode === 'register' && (
-                <Field>
-                  <FieldLabel htmlFor="name">Имя</FieldLabel>
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="Как к вам обращаться"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    disabled={isLoading}
-                  />
-                </Field>
-              )}
-
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
@@ -93,7 +68,7 @@ function LoginInner() {
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder={mode === 'register' ? 'Минимум 6 символов' : 'Введите пароль'}
+                    placeholder="Введите пароль"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -122,39 +97,14 @@ function LoginInner() {
             {error && <FieldMessage variant="error">{error}</FieldMessage>}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading
-                ? (mode === 'login' ? 'Вход...' : 'Регистрация...')
-                : (mode === 'login' ? 'Войти' : 'Зарегистрироваться')}
+              {isLoading ? 'Вход...' : 'Войти'}
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === 'login' ? (
-              <>
-                Нет аккаунта?{' '}
-                <Button
-                  type="button"
-                  variant="link"
-                  className="px-1"
-                  onClick={() => { setMode('register'); setError('') }}
-                >
-                  Зарегистрироваться
-                </Button>
-              </>
-            ) : (
-              <>
-                Уже есть аккаунт?{' '}
-                <Button
-                  type="button"
-                  variant="link"
-                  className="px-1"
-                  onClick={() => { setMode('login'); setError('') }}
-                >
-                  Войти
-                </Button>
-              </>
-            )}
-          </div>
+          {/* Самостоятельной регистрации нет — аккаунты только по приглашению/через админа. */}
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Нет аккаунта? Обратитесь к администратору.
+          </p>
         </CardContent>
       </Card>
     </div>
