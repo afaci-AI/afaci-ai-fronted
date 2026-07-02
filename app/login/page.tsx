@@ -27,20 +27,14 @@ function LoginInner() {
     setError('')
     setIsLoading(true)
     try {
-      const success = mode === 'login'
-        ? await login(email, password)
-        : await register(email, name, password)
-      if (success) {
-        router.push(next)
+      if (mode === 'login') {
+        await login(email, password)
       } else {
-        setError(
-          mode === 'login'
-            ? 'Неверный email или пароль'
-            : 'Не удалось зарегистрироваться. Возможно, email уже занят или пароль короче 6 символов.',
-        )
+        await register(email, name, password)
       }
-    } catch {
-      setError('Произошла ошибка. Попробуйте позже.')
+      router.push(next)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Произошла ошибка. Попробуйте позже.')
     } finally {
       setIsLoading(false)
     }

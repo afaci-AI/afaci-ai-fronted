@@ -67,23 +67,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    try {
-      const res = await authApi.login({ email, password })
-      persist(res.access_token, res.user)
-      return true
-    } catch {
-      return false
-    }
+    const res = await authApi.login({ email, password })
+    persist(res.access_token, res.user)
+    return true
   }, [persist])
 
   const register = useCallback(async (email: string, name: string, password: string): Promise<boolean> => {
-    try {
-      const res = await authApi.register({ email, name, password })
-      persist(res.access_token, res.user)
-      return true
-    } catch {
-      return false
-    }
+    const res = await authApi.register({ email, name, password })
+    persist(res.access_token, res.user)
+    return true
   }, [persist])
 
   const logout = useCallback(() => {
@@ -91,6 +83,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (typeof window !== 'undefined') window.localStorage.removeItem(USER_KEY)
     setUser(null)
   }, [])
+
+  // Сервер вернул 401 на аутентифицированном запросе (истёк срок доступа/токен) — разлогиниваем на фронте.
+  useEffect(() => {
+    function handleSessionExpired() {
+      logout()
+    }
+    window.addEventListener('afaci:session-expired', handleSessionExpired)
+    return () => window.removeEventListener('afaci:session-expired', handleSessionExpired)
+  }, [logout])
 
   const switchRole = useCallback((role: UserRole) => {
     setUser((prev) => (prev ? { ...prev, role } : prev))
