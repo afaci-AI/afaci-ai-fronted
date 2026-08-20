@@ -4,14 +4,40 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { UserPlus, MoreHorizontal, Pencil, Power, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +45,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Field, FieldGroup, FieldLabel, FieldMessage } from '@/components/ui/field'
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldMessage,
+} from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 import { AppHeader } from '@/components/app-header'
 import { DeleteDialog } from '@/components/delete-dialog'
@@ -34,11 +65,12 @@ const roleLabels: Record<UserRole, string> = {
   viewer: 'Аналитик',
 }
 
-const roleBadgeVariants: Record<UserRole, 'default' | 'secondary' | 'outline'> = {
-  admin: 'default',
-  editor: 'secondary',
-  viewer: 'outline',
-}
+const roleBadgeVariants: Record<UserRole, 'default' | 'secondary' | 'outline'> =
+  {
+    admin: 'default',
+    editor: 'secondary',
+    viewer: 'outline',
+  }
 
 const statusLabels: Record<UserStatus, string> = {
   active: 'Активен',
@@ -47,7 +79,10 @@ const statusLabels: Record<UserStatus, string> = {
   expired: 'Истёк',
 }
 
-const statusBadgeVariants: Record<UserStatus, 'default' | 'secondary' | 'outline' | 'destructive'> = {
+const statusBadgeVariants: Record<
+  UserStatus,
+  'default' | 'secondary' | 'outline' | 'destructive'
+> = {
   active: 'outline',
   unlimited: 'outline',
   blocked: 'secondary',
@@ -102,9 +137,12 @@ export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<UserFormData>(emptyForm)
-  const [errors, setErrors] = useState<Partial<Record<keyof UserFormData, string>>>({})
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof UserFormData, string>>
+  >({})
 
-  const canManage = !!currentUser && hasPermission(currentUser.role, 'canManageUsers')
+  const canManage =
+    !!currentUser && hasPermission(currentUser.role, 'canManageUsers')
 
   const loadUsers = useCallback(async () => {
     setIsLoadingUsers(true)
@@ -112,7 +150,11 @@ export default function UsersPage() {
       const data = await usersApi.list()
       setUsers(data)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Не удалось загрузить пользователей')
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : 'Не удалось загрузить пользователей',
+      )
     } finally {
       setIsLoadingUsers(false)
     }
@@ -162,10 +204,17 @@ export default function UsersPage() {
     setDrawerOpen(true)
   }
 
-  const handleChange = <K extends keyof UserFormData>(field: K, value: UserFormData[K]) => {
+  const handleChange = <K extends keyof UserFormData>(
+    field: K,
+    value: UserFormData[K],
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     if (errors[field]) {
-      setErrors((prev) => { const e = { ...prev }; delete e[field]; return e })
+      setErrors((prev) => {
+        const e = { ...prev }
+        delete e[field]
+        return e
+      })
     }
   }
 
@@ -185,8 +234,12 @@ export default function UsersPage() {
     }
     if (!formData.unlimited && !formData.accessExpiresAt) {
       newErrors.accessExpiresAt = 'Укажите дату окончания доступа'
-    } else if (!formData.unlimited && new Date(formData.accessExpiresAt).getTime() <= Date.now()) {
-      newErrors.accessExpiresAt = 'Дата окончания доступа не может быть в прошлом'
+    } else if (
+      !formData.unlimited &&
+      new Date(formData.accessExpiresAt).getTime() <= Date.now()
+    ) {
+      newErrors.accessExpiresAt =
+        'Дата окончания доступа не может быть в прошлом'
     }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -197,16 +250,19 @@ export default function UsersPage() {
     if (!validate()) return
     setIsSubmitting(true)
     try {
-      const accessExpiresAtIso = formData.unlimited || !formData.accessExpiresAt
-        ? null
-        : new Date(formData.accessExpiresAt).toISOString()
+      const accessExpiresAtIso =
+        formData.unlimited || !formData.accessExpiresAt
+          ? null
+          : new Date(formData.accessExpiresAt).toISOString()
 
       if (selectedUser) {
         const updated = await usersApi.update(selectedUser.id, {
           name: formData.name,
           role: formData.role,
           access_expires_at_unlimited: formData.unlimited,
-          access_expires_at: formData.unlimited ? undefined : accessExpiresAtIso,
+          access_expires_at: formData.unlimited
+            ? undefined
+            : accessExpiresAtIso,
         })
         setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)))
         toast.success('Пользователь обновлён')
@@ -234,7 +290,11 @@ export default function UsersPage() {
     try {
       if (user.isActive) {
         await usersApi.deactivate(user.id)
-        setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, isActive: false, status: 'blocked' } : u)))
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === user.id ? { ...u, isActive: false, status: 'blocked' } : u,
+          ),
+        )
         toast.success('Пользователь деактивирован')
       } else {
         const updated = await usersApi.update(user.id, { is_active: true })
@@ -266,13 +326,20 @@ export default function UsersPage() {
 
   return (
     <>
-      <AppHeader breadcrumbs={[{ label: 'Главная', href: '/dashboard' }, { label: 'Пользователи' }]} />
+      <AppHeader
+        breadcrumbs={[
+          { label: 'Главная', href: '/dashboard' },
+          { label: 'Пользователи' },
+        ]}
+      />
       <main className="flex-1 overflow-auto p-4 md:p-6">
         <Card>
           <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>Пользователи</CardTitle>
-              <CardDescription>Управление пользователями, ролями и сроком доступа</CardDescription>
+              <CardDescription>
+                Управление пользователями, ролями и сроком доступа
+              </CardDescription>
             </div>
             <Button onClick={() => handleOpenDrawer()}>
               <UserPlus className="mr-2 h-4 w-4" />
@@ -328,55 +395,94 @@ export default function UsersPage() {
                 <TableBody>
                   {isLoadingUsers ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                      <TableCell
+                        colSpan={6}
+                        className="h-32 text-center text-muted-foreground"
+                      >
                         <Spinner className="mx-auto" />
                       </TableCell>
                     </TableRow>
                   ) : filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                      <TableCell
+                        colSpan={6}
+                        className="h-32 text-center text-muted-foreground"
+                      >
                         Пользователи не найдены
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredUsers.map((user) => (
-                      <TableRow key={user.id} className={!user.isActive ? 'opacity-60' : ''}>
+                      <TableRow
+                        key={user.id}
+                        className={!user.isActive ? 'opacity-60' : ''}
+                      >
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
-                              <span className="text-sm font-medium">{user.name.charAt(0).toUpperCase()}</span>
+                              <span className="text-sm font-medium">
+                                {user.name.charAt(0).toUpperCase()}
+                              </span>
                             </div>
                             <div>
                               <p className="font-medium">{user.name}</p>
-                              <p className="text-sm text-muted-foreground">{user.email}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {user.email}
+                              </p>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={roleBadgeVariants[user.role]}>{roleLabels[user.role]}</Badge>
+                          <Badge variant={roleBadgeVariants[user.role]}>
+                            {roleLabels[user.role]}
+                          </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={statusBadgeVariants[user.status]}>{statusLabels[user.status]}</Badge>
+                          <Badge variant={statusBadgeVariants[user.status]}>
+                            {statusLabels[user.status]}
+                          </Badge>
                         </TableCell>
-                        <TableCell className={isExpiringSoon(user.accessExpiresAt) ? 'font-medium text-amber-600' : 'text-muted-foreground'}>
+                        <TableCell
+                          className={
+                            isExpiringSoon(user.accessExpiresAt)
+                              ? 'font-medium text-amber-600'
+                              : 'text-muted-foreground'
+                          }
+                        >
                           {user.accessExpiresAt
-                            ? new Date(user.accessExpiresAt).toLocaleDateString('ru-RU', {
-                                day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-                              })
+                            ? new Date(user.accessExpiresAt).toLocaleDateString(
+                                'ru-RU',
+                                {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                },
+                              )
                             : 'Безлимитно'}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {new Date(user.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          {new Date(user.createdAt).toLocaleDateString(
+                            'ru-RU',
+                            { day: 'numeric', month: 'short', year: 'numeric' },
+                          )}
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleOpenDrawer(user)}>
+                              <DropdownMenuItem
+                                onClick={() => handleOpenDrawer(user)}
+                              >
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Редактировать
                               </DropdownMenuItem>
@@ -385,7 +491,9 @@ export default function UsersPage() {
                                 disabled={user.id === currentUser?.id}
                               >
                                 <Power className="mr-2 h-4 w-4" />
-                                {user.isActive ? 'Деактивировать' : 'Активировать'}
+                                {user.isActive
+                                  ? 'Деактивировать'
+                                  : 'Активировать'}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
@@ -415,9 +523,15 @@ export default function UsersPage() {
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
           <SheetContent>
             <SheetHeader>
-              <SheetTitle>{selectedUser ? 'Редактировать пользователя' : 'Создать пользователя'}</SheetTitle>
+              <SheetTitle>
+                {selectedUser
+                  ? 'Редактировать пользователя'
+                  : 'Создать пользователя'}
+              </SheetTitle>
               <SheetDescription>
-                {selectedUser ? 'Измените данные пользователя' : 'Заполните данные нового пользователя'}
+                {selectedUser
+                  ? 'Измените данные пользователя'
+                  : 'Заполните данные нового пользователя'}
               </SheetDescription>
             </SheetHeader>
 
@@ -431,7 +545,9 @@ export default function UsersPage() {
                     onChange={(e) => handleChange('name', e.target.value)}
                     aria-invalid={!!errors.name}
                   />
-                  {errors.name && <FieldMessage variant="error">{errors.name}</FieldMessage>}
+                  {errors.name && (
+                    <FieldMessage variant="error">{errors.name}</FieldMessage>
+                  )}
                 </Field>
 
                 <Field>
@@ -444,7 +560,9 @@ export default function UsersPage() {
                     aria-invalid={!!errors.email}
                     disabled={!!selectedUser}
                   />
-                  {errors.email && <FieldMessage variant="error">{errors.email}</FieldMessage>}
+                  {errors.email && (
+                    <FieldMessage variant="error">{errors.email}</FieldMessage>
+                  )}
                 </Field>
 
                 {!selectedUser && (
@@ -457,7 +575,11 @@ export default function UsersPage() {
                       onChange={(e) => handleChange('password', e.target.value)}
                       aria-invalid={!!errors.password}
                     />
-                    {errors.password && <FieldMessage variant="error">{errors.password}</FieldMessage>}
+                    {errors.password && (
+                      <FieldMessage variant="error">
+                        {errors.password}
+                      </FieldMessage>
+                    )}
                     <p className="text-xs text-muted-foreground">
                       Пользователю потребуется сменить пароль при первом входе.
                     </p>
@@ -466,7 +588,10 @@ export default function UsersPage() {
 
                 <Field>
                   <FieldLabel>Роль *</FieldLabel>
-                  <Select value={formData.role} onValueChange={(v) => handleChange('role', v as UserRole)}>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(v) => handleChange('role', v as UserRole)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите роль" />
                     </SelectTrigger>
@@ -474,19 +599,25 @@ export default function UsersPage() {
                       <SelectItem value="admin">
                         <div className="flex items-center gap-2">
                           <Badge variant="default">Администратор</Badge>
-                          <span className="text-xs text-muted-foreground">Полный доступ</span>
+                          <span className="text-xs text-muted-foreground">
+                            Полный доступ
+                          </span>
                         </div>
                       </SelectItem>
                       <SelectItem value="editor">
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary">Редактор</Badge>
-                          <span className="text-xs text-muted-foreground">Редактирование данных</span>
+                          <span className="text-xs text-muted-foreground">
+                            Редактирование данных
+                          </span>
                         </div>
                       </SelectItem>
                       <SelectItem value="viewer">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">Аналитик</Badge>
-                          <span className="text-xs text-muted-foreground">Только просмотр</span>
+                          <span className="text-xs text-muted-foreground">
+                            Только просмотр
+                          </span>
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -498,7 +629,9 @@ export default function UsersPage() {
                     <FieldLabel>Безлимитный доступ</FieldLabel>
                     <Switch
                       checked={formData.unlimited}
-                      onCheckedChange={(checked) => handleChange('unlimited', checked)}
+                      onCheckedChange={(checked) =>
+                        handleChange('unlimited', checked)
+                      }
                     />
                   </div>
                   {!formData.unlimited && (
@@ -506,17 +639,28 @@ export default function UsersPage() {
                       <Input
                         type="datetime-local"
                         value={formData.accessExpiresAt}
-                        onChange={(e) => handleChange('accessExpiresAt', e.target.value)}
+                        onChange={(e) =>
+                          handleChange('accessExpiresAt', e.target.value)
+                        }
                         aria-invalid={!!errors.accessExpiresAt}
                       />
-                      {errors.accessExpiresAt && <FieldMessage variant="error">{errors.accessExpiresAt}</FieldMessage>}
+                      {errors.accessExpiresAt && (
+                        <FieldMessage variant="error">
+                          {errors.accessExpiresAt}
+                        </FieldMessage>
+                      )}
                     </>
                   )}
                 </Field>
               </FieldGroup>
 
               <SheetFooter className="mt-6">
-                <Button type="button" variant="outline" onClick={() => setDrawerOpen(false)} disabled={isSubmitting}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDrawerOpen(false)}
+                  disabled={isSubmitting}
+                >
                   Отмена
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>

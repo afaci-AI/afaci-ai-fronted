@@ -41,11 +41,19 @@ export const usersApi = {
   },
   get: (id: string) => fetchApi<AdminUser>(`/users/${id}`),
   create: (data: UserCreateData) =>
-    fetchApi<AdminUser>('/users', { method: 'POST', body: JSON.stringify(data) }),
+    fetchApi<AdminUser>('/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   update: (id: string, data: UserUpdateData) =>
-    fetchApi<AdminUser>(`/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    fetchApi<AdminUser>(`/users/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
   deactivate: (id: string) =>
     fetchApi<{ status: string }>(`/users/${id}`, { method: 'DELETE' }),
   deletePermanently: (id: string) =>
-    fetchApi<{ status: string }>(`/users/${id}/permanent`, { method: 'DELETE' }),
+    fetchApi<{ status: string }>(`/users/${id}/permanent`, {
+      method: 'DELETE',
+    }),
 }

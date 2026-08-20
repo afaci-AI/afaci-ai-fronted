@@ -5,8 +5,19 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Database, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { FieldGroup, Field, FieldLabel, FieldMessage } from '@/components/ui/field'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  FieldGroup,
+  Field,
+  FieldLabel,
+  FieldMessage,
+} from '@/components/ui/field'
 import { useAuth } from '@/lib/auth-context'
 
 function LoginInner() {
@@ -28,7 +39,11 @@ function LoginInner() {
       await login(email, password)
       router.push(next)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Произошла ошибка. Попробуйте позже.')
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Произошла ошибка. Попробуйте позже.',
+      )
     } finally {
       setIsLoading(false)
     }

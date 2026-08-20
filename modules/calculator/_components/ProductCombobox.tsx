@@ -2,16 +2,27 @@
 
 import { useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
-  Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
 } from '@/components/ui/command'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { CalcProduct } from '@/modules/products/api'
 
 export function ProductCombobox({
-  value, onChange, products,
+  value,
+  onChange,
+  products,
 }: {
   value: string
   onChange: (id: string) => void
@@ -41,9 +52,14 @@ export function ProductCombobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+      <PopoverContent
+        className="w-[--radix-popover-trigger-width] p-0"
+        align="start"
+      >
         <Command
-          filter={(val, search) => (val.toLowerCase().includes(search.toLowerCase()) ? 1 : 0)}
+          filter={(val, search) =>
+            val.toLowerCase().includes(search.toLowerCase()) ? 1 : 0
+          }
         >
           <CommandInput placeholder="Поиск сырья…" />
           <CommandList>
@@ -53,15 +69,22 @@ export function ProductCombobox({
                 <CommandItem
                   key={p.product_id}
                   value={`${p.product_name} ${p.region_name} ${p.subcategory_name ?? ''} ${p.product_id}`}
-                  onSelect={() => { onChange(p.product_id); setOpen(false) }}
+                  onSelect={() => {
+                    onChange(p.product_id)
+                    setOpen(false)
+                  }}
                 >
                   <Check
-                    className={cn('mr-2 h-4 w-4', value === p.product_id ? 'opacity-100' : 'opacity-0')}
+                    className={cn(
+                      'mr-2 h-4 w-4',
+                      value === p.product_id ? 'opacity-100' : 'opacity-0',
+                    )}
                   />
                   <div className="flex flex-col">
                     <span>{p.product_name}</span>
                     <span className="text-muted-foreground text-xs">
-                      {p.region_name}{p.subcategory_name ? ` · ${p.subcategory_name}` : ''}
+                      {p.region_name}
+                      {p.subcategory_name ? ` · ${p.subcategory_name}` : ''}
                     </span>
                   </div>
                 </CommandItem>

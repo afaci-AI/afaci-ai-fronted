@@ -3,7 +3,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -13,10 +19,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { FieldGroup, Field, FieldLabel, FieldMessage } from '@/components/ui/field'
+import {
+  FieldGroup,
+  Field,
+  FieldLabel,
+  FieldMessage,
+} from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 import { AppHeader } from '@/components/app-header'
-import { categoriesApi, regionsApi, subcategoriesApi, productsApi } from '@/lib/api'
+import {
+  categoriesApi,
+  regionsApi,
+  subcategoriesApi,
+  productsApi,
+} from '@/lib/api'
 import type { Category, Region, Subcategory } from '@/lib/types'
 
 interface FormData {
@@ -30,7 +46,9 @@ export default function NewProductPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>(
+    {},
+  )
   const [formData, setFormData] = useState<FormData>({
     name: '',
     category_id: '',
@@ -47,7 +65,7 @@ export default function NewProductPage() {
       const [cats, regs, subcats] = await Promise.all([
         categoriesApi.list(),
         regionsApi.list(),
-        subcategoriesApi.list()
+        subcategoriesApi.list(),
       ])
       setCategories(cats)
       setRegions(regs)
@@ -66,7 +84,7 @@ export default function NewProductPage() {
   }, [loadData])
 
   const availableSubcategories = formData.category_id
-    ? subcategories.filter(s => s.category_id === formData.category_id)
+    ? subcategories.filter((s) => s.category_id === formData.category_id)
     : []
 
   const handleChange = (field: keyof FormData, value: string) => {
@@ -146,7 +164,8 @@ export default function NewProductPage() {
             <CardHeader>
               <CardTitle>Новый продукт</CardTitle>
               <CardDescription>
-                Заполните информацию о продукте. После создания можно добавить нутриенты.
+                Заполните информацию о продукте. После создания можно добавить
+                нутриенты.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -163,7 +182,9 @@ export default function NewProductPage() {
                       onChange={(e) => handleChange('name', e.target.value)}
                       aria-invalid={!!errors.name}
                     />
-                    {errors.name && <FieldMessage variant="error">{errors.name}</FieldMessage>}
+                    {errors.name && (
+                      <FieldMessage variant="error">{errors.name}</FieldMessage>
+                    )}
                   </Field>
 
                   <Field>
@@ -172,7 +193,9 @@ export default function NewProductPage() {
                     </FieldLabel>
                     <Select
                       value={formData.category_id}
-                      onValueChange={(value) => handleChange('category_id', value)}
+                      onValueChange={(value) =>
+                        handleChange('category_id', value)
+                      }
                     >
                       <SelectTrigger aria-invalid={!!errors.category_id}>
                         <SelectValue placeholder="Выберите категорию" />
@@ -185,24 +208,37 @@ export default function NewProductPage() {
                         ))}
                       </SelectContent>
                     </Select>
-                    {errors.category_id && <FieldMessage variant="error">{errors.category_id}</FieldMessage>}
+                    {errors.category_id && (
+                      <FieldMessage variant="error">
+                        {errors.category_id}
+                      </FieldMessage>
+                    )}
                   </Field>
 
                   <Field>
-                    <FieldLabel htmlFor="subcategory_id">Подкатегория</FieldLabel>
+                    <FieldLabel htmlFor="subcategory_id">
+                      Подкатегория
+                    </FieldLabel>
                     <Select
                       value={formData.subcategory_id}
-                      onValueChange={(value) => handleChange('subcategory_id', value)}
-                      disabled={!formData.category_id || availableSubcategories.length === 0}
+                      onValueChange={(value) =>
+                        handleChange('subcategory_id', value)
+                      }
+                      disabled={
+                        !formData.category_id ||
+                        availableSubcategories.length === 0
+                      }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={
-                          !formData.category_id
-                            ? 'Сначала выберите категорию'
-                            : availableSubcategories.length === 0
-                            ? 'Нет подкатегорий'
-                            : 'Выберите подкатегорию'
-                        } />
+                        <SelectValue
+                          placeholder={
+                            !formData.category_id
+                              ? 'Сначала выберите категорию'
+                              : availableSubcategories.length === 0
+                                ? 'Нет подкатегорий'
+                                : 'Выберите подкатегорию'
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {availableSubcategories.map((sub) => (
@@ -218,7 +254,9 @@ export default function NewProductPage() {
                     <FieldLabel htmlFor="region_id">Регион</FieldLabel>
                     <Select
                       value={formData.region_id}
-                      onValueChange={(value) => handleChange('region_id', value)}
+                      onValueChange={(value) =>
+                        handleChange('region_id', value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Выберите регион" />

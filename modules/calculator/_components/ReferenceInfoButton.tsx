@@ -2,13 +2,22 @@
 
 import { Info, FlaskConical } from 'lucide-react'
 import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { nf } from '../_lib/utils'
 import type { ReferenceProtein } from '../api'
 
-export function ReferenceInfoButton({ reference }: { reference: ReferenceProtein }) {
+export function ReferenceInfoButton({
+  reference,
+}: {
+  reference: ReferenceProtein
+}) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -22,18 +31,24 @@ export function ReferenceInfoButton({ reference }: { reference: ReferenceProtein
             <FlaskConical className="h-5 w-5 text-primary" />
             Эталонный белок «{reference.name}»
           </DialogTitle>
-          <DialogDescription>Почему он выбран как эталон и что это значит</DialogDescription>
+          <DialogDescription>
+            Почему он выбран как эталон и что это значит
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 text-sm">
           <p>{reference.description}</p>
           <div className="rounded-md border bg-muted/40 p-3">
             <p className="text-muted-foreground mb-1 text-xs">
-              Аминокислотный скор показывает, насколько белок продукта приближается к эталону:
+              Аминокислотный скор показывает, насколько белок продукта
+              приближается к эталону:
             </p>
-            <p className="font-medium">Скор C = (НАК продукта ÷ НАК эталона) × 100&nbsp;%</p>
+            <p className="font-medium">
+              Скор C = (НАК продукта ÷ НАК эталона) × 100&nbsp;%
+            </p>
             <p className="text-muted-foreground mt-1 text-xs">
-              Эталон — «идеальный» белок с оптимально сбалансированным составом незаменимых
-              аминокислот (НАК). Минимальный скор задаёт лимитирующую кислоту и биологическую ценность.
+              Эталон — «идеальный» белок с оптимально сбалансированным составом
+              незаменимых аминокислот (НАК). Минимальный скор задаёт
+              лимитирующую кислоту и биологическую ценность.
             </p>
           </div>
           <div>
@@ -42,8 +57,13 @@ export function ReferenceInfoButton({ reference }: { reference: ReferenceProtein
             </div>
             <div className="grid grid-cols-4 gap-2">
               {reference.values.map((v) => (
-                <div key={v.amino_acid} className="rounded-md border p-2 text-center">
-                  <div className="text-muted-foreground text-[11px]">{v.amino_acid}</div>
+                <div
+                  key={v.amino_acid}
+                  className="rounded-md border p-2 text-center"
+                >
+                  <div className="text-muted-foreground text-[11px]">
+                    {v.amino_acid}
+                  </div>
                   <div className="font-semibold">{nf(v.value, 1)}</div>
                 </div>
               ))}

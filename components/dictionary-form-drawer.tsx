@@ -20,7 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { FieldGroup, Field, FieldLabel, FieldMessage } from '@/components/ui/field'
+import {
+  FieldGroup,
+  Field,
+  FieldLabel,
+  FieldMessage,
+} from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 
 export interface FormField {
@@ -82,7 +87,7 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
 
   const handleChange = (key: string, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }))
-    
+
     // Clear error on change
     if (errors[key]) {
       setErrors((prev) => {
@@ -98,18 +103,19 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
 
     fields.forEach((field) => {
       const value = formData[field.key]?.trim()
-      
+
       if (field.required && !value) {
         newErrors[field.key] = 'Обязательное поле'
       }
-      
+
       // Check for duplicates
       if (
         duplicateField &&
         field.key === duplicateField &&
         value &&
         existingValues.includes(value.toLowerCase()) &&
-        (!isEdit || value.toLowerCase() !== String(data?.[duplicateField]).toLowerCase())
+        (!isEdit ||
+          value.toLowerCase() !== String(data?.[duplicateField]).toLowerCase())
       ) {
         newErrors[field.key] = 'Такое значение уже существует'
       }
@@ -121,7 +127,7 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validate()) return
 
     setIsSubmitting(true)
@@ -151,9 +157,11 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
               <Field key={field.key}>
                 <FieldLabel htmlFor={field.key}>
                   {field.label}
-                  {field.required && <span className="text-destructive ml-1">*</span>}
+                  {field.required && (
+                    <span className="text-destructive ml-1">*</span>
+                  )}
                 </FieldLabel>
-                
+
                 {field.type === 'text' && (
                   <Input
                     id={field.key}
@@ -163,7 +171,7 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
                     aria-invalid={!!errors[field.key]}
                   />
                 )}
-                
+
                 {field.type === 'textarea' && (
                   <Textarea
                     id={field.key}
@@ -174,14 +182,16 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
                     rows={3}
                   />
                 )}
-                
+
                 {field.type === 'select' && field.options && (
                   <Select
                     value={formData[field.key] || ''}
                     onValueChange={(value) => handleChange(field.key, value)}
                   >
                     <SelectTrigger aria-invalid={!!errors[field.key]}>
-                      <SelectValue placeholder={field.placeholder || 'Выберите...'} />
+                      <SelectValue
+                        placeholder={field.placeholder || 'Выберите...'}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {field.options.map((option) => (
@@ -192,9 +202,11 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
                     </SelectContent>
                   </Select>
                 )}
-                
+
                 {errors[field.key] && (
-                  <FieldMessage variant="error">{errors[field.key]}</FieldMessage>
+                  <FieldMessage variant="error">
+                    {errors[field.key]}
+                  </FieldMessage>
                 )}
               </Field>
             ))}

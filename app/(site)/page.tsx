@@ -1,33 +1,49 @@
 import Link from 'next/link'
 import {
-  Database, Calculator, FlaskConical, MapPin, ArrowRight, Leaf, Bookmark, Sparkles,
+  Database,
+  Calculator,
+  FlaskConical,
+  MapPin,
+  ArrowRight,
+  Leaf,
+  Bookmark,
+  Sparkles,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 
 // Основные инструменты приложения (требуют входа). Карточки кликабельны.
 const tools = [
   {
     icon: Calculator,
     title: 'Калькулятор ценности',
-    description: 'Расчёт пищевой и биологической ценности рецептуры по методике Липатова: '
-      + 'макросостав, аминокислотный скор, БЦ, КРАС, V и G.',
+    description:
+      'Расчёт пищевой и биологической ценности рецептуры по методике Липатова: ' +
+      'макросостав, аминокислотный скор, БЦ, КРАС, V и G.',
     href: '/calculator',
     cta: 'Открыть калькулятор',
   },
   {
     icon: Bookmark,
     title: 'Сохранённые рецептуры',
-    description: 'Сохраняйте рецептуры с названием и группируйте их, как плейлисты. '
-      + 'Перемещайте между группами, редактируйте и удаляйте.',
+    description:
+      'Сохраняйте рецептуры с названием и группируйте их, как плейлисты. ' +
+      'Перемещайте между группами, редактируйте и удаляйте.',
     href: '/saved-recipes',
     cta: 'Мои рецептуры',
   },
   {
     icon: Sparkles,
     title: 'Ранжирование рецептур',
-    description: 'Сравните сохранённые рецептуры и определите лучшую по показателям '
-      + 'БЦ, КРАС, V и G с градацией от лучшей к худшей.',
+    description:
+      'Сравните сохранённые рецептуры и определите лучшую по показателям ' +
+      'БЦ, КРАС, V и G с градацией от лучшей к худшей.',
     href: '/ranking',
     cta: 'Перейти к ранжированию',
   },
@@ -37,22 +53,26 @@ const features = [
   {
     icon: Database,
     title: 'База данных продуктов',
-    description: 'Химический, аминокислотный и минеральный состав продуктов питания по регионам Кыргызстана.',
+    description:
+      'Химический, аминокислотный и минеральный состав продуктов питания по регионам Кыргызстана.',
   },
   {
     icon: Calculator,
     title: 'Калькулятор нутриентов',
-    description: 'Рассчитайте содержание нутриентов для выбранных продуктов и нужного веса порции.',
+    description:
+      'Рассчитайте содержание нутриентов для выбранных продуктов и нужного веса порции.',
   },
   {
     icon: MapPin,
     title: 'Данные по регионам',
-    description: 'Состав продуктов с учётом региональных особенностей и условий выращивания.',
+    description:
+      'Состав продуктов с учётом региональных особенностей и условий выращивания.',
   },
   {
     icon: FlaskConical,
     title: 'Полный нутриентный профиль',
-    description: 'Белки, жиры, углеводы, витамины, макро- и микроэлементы в одном месте.',
+    description:
+      'Белки, жиры, углеводы, витамины, макро- и микроэлементы в одном месте.',
   },
 ]
 
@@ -71,8 +91,8 @@ export default function HomePage() {
               База данных продуктов питания
             </h1>
             <p className="mt-6 text-lg text-muted-foreground sm:text-xl">
-              Изучайте химический, аминокислотный и минеральный состав продуктов,
-              рассчитывайте нутриенты для своего рациона.
+              Изучайте химический, аминокислотный и минеральный состав
+              продуктов, рассчитывайте нутриенты для своего рациона.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button asChild size="lg" className="w-full sm:w-auto">
@@ -81,7 +101,12 @@ export default function HomePage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
                 <Link href="/calculator">
                   <Calculator className="mr-2 h-4 w-4" />
                   Калькулятор
@@ -95,9 +120,12 @@ export default function HomePage() {
       {/* Инструменты (требуют входа) */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Инструменты</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">
+            Инструменты
+          </h2>
           <p className="mt-3 text-muted-foreground">
-            Калькулятор, сохранённые рецептуры и ранжирование рецептур. Доступны после входа.
+            Калькулятор, сохранённые рецептуры и ранжирование рецептур. Доступны
+            после входа.
           </p>
         </div>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
@@ -111,7 +139,9 @@ export default function HomePage() {
                   <CardTitle className="text-lg">{tool.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col">
-                  <CardDescription className="flex-1">{tool.description}</CardDescription>
+                  <CardDescription className="flex-1">
+                    {tool.description}
+                  </CardDescription>
                   <span className="text-primary mt-4 inline-flex items-center text-sm font-medium">
                     {tool.cta}
                     <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -126,7 +156,9 @@ export default function HomePage() {
       {/* Features */}
       <section className="border-t border-border mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Возможности</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">
+            Возможности
+          </h2>
           <p className="mt-3 text-muted-foreground">
             Всё необходимое для работы с данными о составе продуктов
           </p>

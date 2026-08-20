@@ -1,8 +1,23 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Bar, BarChart, Cell, LabelList, Pie, PieChart, XAxis, YAxis } from 'recharts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Bar,
+  BarChart,
+  Cell,
+  LabelList,
+  Pie,
+  PieChart,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
   ChartContainer,
@@ -29,21 +44,40 @@ function findMacro(
   match: (name: string) => boolean,
 ) {
   const candidates = nutrients
-    .map((n) => ({ n, name: nutrientNames.find((x) => x.id === n.nutrient_name_id)?.name ?? '' }))
+    .map((n) => ({
+      n,
+      name: nutrientNames.find((x) => x.id === n.nutrient_name_id)?.name ?? '',
+    }))
     .filter(({ name }) => match(name.toLowerCase()))
     .sort((a, b) => a.name.length - b.name.length)
   return candidates[0]?.n
 }
 
-export function ProductNutrientCharts({ nutrients, nutrientNames, nutrientTypes, units }: Props) {
-  const nameOf = (id: string) => nutrientNames.find((x) => x.id === id)?.name ?? '—'
+export function ProductNutrientCharts({
+  nutrients,
+  nutrientNames,
+  nutrientTypes,
+  units,
+}: Props) {
+  const nameOf = (id: string) =>
+    nutrientNames.find((x) => x.id === id)?.name ?? '—'
   const unitOf = (id: string) => units.find((x) => x.id === id)?.name ?? ''
 
   // --- БЖУ for the donut ---
   const bzhu = useMemo(() => {
-    const protein = findMacro(nutrients, nutrientNames, (n) => n.includes('белок') || n.includes('белк'))
-    const fat = findMacro(nutrients, nutrientNames, (n) => n.includes('жир') && !n.includes('кислот'))
-    const carb = findMacro(nutrients, nutrientNames, (n) => n.includes('углевод'))
+    const protein = findMacro(
+      nutrients,
+      nutrientNames,
+      (n) => n.includes('белок') || n.includes('белк'),
+    )
+    const fat = findMacro(
+      nutrients,
+      nutrientNames,
+      (n) => n.includes('жир') && !n.includes('кислот'),
+    )
+    const carb = findMacro(nutrients, nutrientNames, (n) =>
+      n.includes('углевод'),
+    )
     return [
       { key: 'protein', label: 'Белки', value: protein?.quantity ?? 0 },
       { key: 'fat', label: 'Жиры', value: fat?.quantity ?? 0 },
@@ -71,9 +105,13 @@ export function ProductNutrientCharts({ nutrients, nutrientNames, nutrientTypes,
 
     const ungrouped = nutrients.filter((n) => {
       const nm = nutrientNames.find((x) => x.id === n.nutrient_name_id)
-      return !nm?.nutrient_type_id || !nutrientTypes.find((t) => t.id === nm.nutrient_type_id)
+      return (
+        !nm?.nutrient_type_id ||
+        !nutrientTypes.find((t) => t.id === nm.nutrient_type_id)
+      )
     })
-    if (ungrouped.length > 0) typeGroups.push({ title: 'Без типа', items: ungrouped })
+    if (ungrouped.length > 0)
+      typeGroups.push({ title: 'Без типа', items: ungrouped })
 
     // For each type, split into one chart per distinct unit.
     return typeGroups.map((group) => {
@@ -94,7 +132,9 @@ export function ProductNutrientCharts({ nutrients, nutrientNames, nutrientTypes,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nutrients, nutrientNames, nutrientTypes, units])
 
-  const barConfig: ChartConfig = { value: { label: 'Количество', color: 'var(--chart-1)' } }
+  const barConfig: ChartConfig = {
+    value: { label: 'Количество', color: 'var(--chart-1)' },
+  }
 
   return (
     <div className="space-y-6">
@@ -103,13 +143,26 @@ export function ProductNutrientCharts({ nutrients, nutrientNames, nutrientTypes,
         <Card>
           <CardHeader>
             <CardTitle>Соотношение БЖУ</CardTitle>
-            <CardDescription>Белки, жиры и углеводы на 100 г продукта</CardDescription>
+            <CardDescription>
+              Белки, жиры и углеводы на 100 г продукта
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={bzhuConfig} className="mx-auto aspect-square max-h-[260px]">
+            <ChartContainer
+              config={bzhuConfig}
+              className="mx-auto aspect-square max-h-[260px]"
+            >
               <PieChart>
-                <ChartTooltip content={<ChartTooltipContent nameKey="label" hideLabel />} />
-                <Pie data={bzhu} dataKey="value" nameKey="label" innerRadius={60} strokeWidth={2}>
+                <ChartTooltip
+                  content={<ChartTooltipContent nameKey="label" hideLabel />}
+                />
+                <Pie
+                  data={bzhu}
+                  dataKey="value"
+                  nameKey="label"
+                  innerRadius={60}
+                  strokeWidth={2}
+                >
                   {bzhu.map((d) => (
                     <Cell key={d.key} fill={`var(--color-${d.key})`} />
                   ))}
@@ -131,14 +184,19 @@ export function ProductNutrientCharts({ nutrients, nutrientNames, nutrientTypes,
           {sections.map((section) => (
             <div key={section.title}>
               <div className="mb-3 flex flex-wrap items-center gap-2">
-                <Badge variant="secondary" className="text-xs">{section.title}</Badge>
+                <Badge variant="secondary" className="text-xs">
+                  {section.title}
+                </Badge>
               </div>
               <div className="space-y-6">
                 {section.charts.map((chart, i) => (
                   <div key={i}>
                     {chart.unit && (
                       <div className="mb-2">
-                        <Badge variant="outline" className="text-xs font-semibold text-foreground">
+                        <Badge
+                          variant="outline"
+                          className="text-xs font-semibold text-foreground"
+                        >
                           ед. изм.: {chart.unit}
                         </Badge>
                       </div>
@@ -148,7 +206,12 @@ export function ProductNutrientCharts({ nutrients, nutrientNames, nutrientTypes,
                       className="aspect-auto w-full"
                       style={{ height: chart.data.length * 36 + 16 }}
                     >
-                      <BarChart accessibilityLayer data={chart.data} layout="vertical" margin={{ right: 48, left: 8 }}>
+                      <BarChart
+                        accessibilityLayer
+                        data={chart.data}
+                        layout="vertical"
+                        margin={{ right: 48, left: 8 }}
+                      >
                         <XAxis type="number" hide />
                         <YAxis
                           type="category"
@@ -158,8 +221,15 @@ export function ProductNutrientCharts({ nutrients, nutrientNames, nutrientTypes,
                           axisLine={false}
                           tick={{ fontSize: 12 }}
                         />
-                        <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                        <Bar dataKey="value" fill="var(--color-value)" radius={4}>
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent hideLabel />}
+                        />
+                        <Bar
+                          dataKey="value"
+                          fill="var(--color-value)"
+                          radius={4}
+                        >
                           <LabelList
                             dataKey="value"
                             position="right"

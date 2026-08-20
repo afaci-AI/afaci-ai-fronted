@@ -3,7 +3,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Plus, Upload } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { AppHeader } from '@/components/app-header'
@@ -33,7 +39,7 @@ export default function ProductsPage() {
       const [prods, cats, regs] = await Promise.all([
         productsApi.list(),
         categoriesApi.list(),
-        regionsApi.list()
+        regionsApi.list(),
       ])
       setProducts(prods)
       setCategories(cats)
@@ -69,8 +75,12 @@ export default function ProductsPage() {
       key: 'category_id',
       label: 'Категория',
       render: (item) => {
-        const category = categories.find(c => c.id === item.category_id)
-        return category ? <Badge variant="secondary">{category.name}</Badge> : '—'
+        const category = categories.find((c) => c.id === item.category_id)
+        return category ? (
+          <Badge variant="secondary">{category.name}</Badge>
+        ) : (
+          '—'
+        )
       },
     },
     {
@@ -78,7 +88,7 @@ export default function ProductsPage() {
       label: 'Регион',
       render: (item) => {
         if (!item.region_id) return '—'
-        const region = regions.find(r => r.id === item.region_id)
+        const region = regions.find((r) => r.id === item.region_id)
         return region ? <Badge variant="outline">{region.name}</Badge> : '—'
       },
     },
@@ -189,4 +199,3 @@ export default function ProductsPage() {
     </>
   )
 }
-

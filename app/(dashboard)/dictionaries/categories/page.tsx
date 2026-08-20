@@ -2,11 +2,20 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Plus } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AppHeader } from '@/components/app-header'
 import { DataTable, type Column } from '@/components/data-table'
-import { DictionaryFormDrawer, type FormField } from '@/components/dictionary-form-drawer'
+import {
+  DictionaryFormDrawer,
+  type FormField,
+} from '@/components/dictionary-form-drawer'
 import { DeleteDialog } from '@/components/delete-dialog'
 import { useAuth } from '@/lib/auth-context'
 import { hasPermission } from '@/lib/types'
@@ -123,7 +132,12 @@ export default function CategoriesPage() {
               </CardDescription>
             </div>
             {canEdit && (
-              <Button onClick={() => { setSelectedItem(null); setDrawerOpen(true); }}>
+              <Button
+                onClick={() => {
+                  setSelectedItem(null)
+                  setDrawerOpen(true)
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить
               </Button>
@@ -153,7 +167,9 @@ export default function CategoriesPage() {
         <DictionaryFormDrawer
           open={drawerOpen}
           onOpenChange={setDrawerOpen}
-          title={selectedItem ? 'Редактировать категорию' : 'Добавить категорию'}
+          title={
+            selectedItem ? 'Редактировать категорию' : 'Добавить категорию'
+          }
           description="Заполните информацию о категории"
           fields={formFields}
           data={selectedItem}

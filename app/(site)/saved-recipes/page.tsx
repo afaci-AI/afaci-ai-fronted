@@ -4,18 +4,41 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  Bookmark, FolderPlus, Loader2, Pencil, Trash2, FolderInput, Sparkles, Calculator,
+  Bookmark,
+  FolderPlus,
+  Loader2,
+  Pencil,
+  Trash2,
+  FolderInput,
+  Sparkles,
+  Calculator,
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select'
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import { DeleteDialog } from '@/components/delete-dialog'
 import { toast } from 'sonner'
@@ -29,7 +52,10 @@ const NONE = '__none__'
 
 function nf(n: number | null | undefined, d = 1): string {
   if (n === null || n === undefined) return '—'
-  return n.toLocaleString('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d })
+  return n.toLocaleString('ru-RU', {
+    minimumFractionDigits: d,
+    maximumFractionDigits: d,
+  })
 }
 
 export default function SavedRecipesPage() {
@@ -46,16 +72,22 @@ export default function SavedRecipesPage() {
   const [deleteTarget, setDeleteTarget] = useState<SavedRecipe | null>(null)
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) router.replace('/login?next=/saved-recipes')
+    if (!authLoading && !isAuthenticated)
+      router.replace('/login?next=/saved-recipes')
   }, [authLoading, isAuthenticated, router])
 
   const load = useCallback(async () => {
     try {
-      const [gs, rs] = await Promise.all([savedApi.groups(), savedApi.recipes()])
+      const [gs, rs] = await Promise.all([
+        savedApi.groups(),
+        savedApi.recipes(),
+      ])
       setGroups(gs)
       setRecipes(rs)
     } catch (e) {
-      toast.error('Не удалось загрузить рецептуры', { description: e instanceof Error ? e.message : String(e) })
+      toast.error('Не удалось загрузить рецептуры', {
+        description: e instanceof Error ? e.message : String(e),
+      })
     } finally {
       setLoading(false)
     }
@@ -88,11 +120,15 @@ export default function SavedRecipesPage() {
 
   const moveRecipe = async (recipe: SavedRecipe, groupId: string) => {
     try {
-      await savedApi.updateRecipe(recipe.id, { group_id: groupId === NONE ? null : groupId })
+      await savedApi.updateRecipe(recipe.id, {
+        group_id: groupId === NONE ? null : groupId,
+      })
       toast.success('Рецептура перемещена')
       await load()
     } catch (e) {
-      toast.error('Не удалось переместить', { description: e instanceof Error ? e.message : String(e) })
+      toast.error('Не удалось переместить', {
+        description: e instanceof Error ? e.message : String(e),
+      })
     }
   }
 
@@ -104,7 +140,9 @@ export default function SavedRecipesPage() {
       setRenameTarget(null)
       await load()
     } catch (e) {
-      toast.error('Не удалось переименовать', { description: e instanceof Error ? e.message : String(e) })
+      toast.error('Не удалось переименовать', {
+        description: e instanceof Error ? e.message : String(e),
+      })
     }
   }
 
@@ -125,15 +163,20 @@ export default function SavedRecipesPage() {
             Сохранённые рецептуры
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Ваши рецептуры и группы. Перемещайте между группами, редактируйте и удаляйте.
+            Ваши рецептуры и группы. Перемещайте между группами, редактируйте и
+            удаляйте.
           </p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
-            <Link href="/ranking"><Sparkles className="mr-1.5 h-4 w-4" /> Ранжирование</Link>
+            <Link href="/ranking">
+              <Sparkles className="mr-1.5 h-4 w-4" /> Ранжирование
+            </Link>
           </Button>
           <Button asChild>
-            <Link href="/calculator"><Calculator className="mr-1.5 h-4 w-4" /> В калькулятор</Link>
+            <Link href="/calculator">
+              <Calculator className="mr-1.5 h-4 w-4" /> В калькулятор
+            </Link>
           </Button>
         </div>
       </div>
@@ -146,16 +189,29 @@ export default function SavedRecipesPage() {
         <div className="grid gap-6 md:grid-cols-[220px_1fr]">
           {/* Группы (фильтр) */}
           <aside className="space-y-1">
-            <FilterButton active={filter === ALL} onClick={() => setFilter(ALL)}
-              label="Все рецептуры" count={recipes.length} />
-            <FilterButton active={filter === NONE} onClick={() => setFilter(NONE)}
-              label="Без группы" count={ungroupedCount} />
+            <FilterButton
+              active={filter === ALL}
+              onClick={() => setFilter(ALL)}
+              label="Все рецептуры"
+              count={recipes.length}
+            />
+            <FilterButton
+              active={filter === NONE}
+              onClick={() => setFilter(NONE)}
+              label="Без группы"
+              count={ungroupedCount}
+            />
             <div className="text-muted-foreground px-2 pt-3 pb-1 text-xs font-medium uppercase">
               Группы
             </div>
             {groups.map((g) => (
-              <FilterButton key={g.id} active={filter === g.id} onClick={() => setFilter(g.id)}
-                label={g.name} count={g.recipe_count} />
+              <FilterButton
+                key={g.id}
+                active={filter === g.id}
+                onClick={() => setFilter(g.id)}
+                label={g.name}
+                count={g.recipe_count}
+              />
             ))}
             <CreateGroupDialog onCreate={createGroup} />
           </aside>
@@ -166,8 +222,10 @@ export default function SavedRecipesPage() {
               <Card>
                 <CardContent className="text-muted-foreground py-16 text-center">
                   Здесь пока нет рецептур. Откройте{' '}
-                  <Link href="/calculator" className="text-primary underline">калькулятор</Link>,
-                  рассчитайте и нажмите «Сохранить рецептуру».
+                  <Link href="/calculator" className="text-primary underline">
+                    калькулятор
+                  </Link>
+                  , рассчитайте и нажмите «Сохранить рецептуру».
                 </CardContent>
               </Card>
             ) : (
@@ -176,13 +234,22 @@ export default function SavedRecipesPage() {
                   <Card key={r.id} className="flex flex-col">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-base leading-tight">{r.name}</CardTitle>
+                        <CardTitle className="text-base leading-tight">
+                          {r.name}
+                        </CardTitle>
                         <div className="flex shrink-0 flex-wrap items-center gap-1">
                           {r.metrics?.bc == null && (
-                            <Badge variant="outline" className="border-amber-400 text-amber-600">Черновик</Badge>
+                            <Badge
+                              variant="outline"
+                              className="border-amber-400 text-amber-600"
+                            >
+                              Черновик
+                            </Badge>
                           )}
                           {groupName(r.group_id) && (
-                            <Badge variant="secondary">{groupName(r.group_id)}</Badge>
+                            <Badge variant="secondary">
+                              {groupName(r.group_id)}
+                            </Badge>
                           )}
                         </div>
                       </div>
@@ -212,23 +279,37 @@ export default function SavedRecipesPage() {
                           <SelectContent>
                             <SelectItem value={NONE}>Без группы</SelectItem>
                             {groups.map((g) => (
-                              <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                              <SelectItem key={g.id} value={g.id}>
+                                {g.name}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        <Button asChild variant="outline" size="sm" className="h-8">
+                        <Button
+                          asChild
+                          variant="outline"
+                          size="sm"
+                          className="h-8"
+                        >
                           <Link href={`/calculator?edit=${r.id}`}>
                             <Pencil className="mr-1 h-3.5 w-3.5" /> Изменить
                           </Link>
                         </Button>
                         <Button
-                          variant="ghost" size="sm" className="h-8"
-                          onClick={() => { setRenameTarget(r); setRenameValue(r.name) }}
+                          variant="ghost"
+                          size="sm"
+                          className="h-8"
+                          onClick={() => {
+                            setRenameTarget(r)
+                            setRenameValue(r.name)
+                          }}
                         >
                           Переименовать
                         </Button>
                         <Button
-                          variant="ghost" size="icon" className="text-destructive h-8 w-8"
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive h-8 w-8"
                           onClick={() => setDeleteTarget(r)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -244,17 +325,27 @@ export default function SavedRecipesPage() {
       )}
 
       {/* Переименование */}
-      <Dialog open={!!renameTarget} onOpenChange={(o) => !o && setRenameTarget(null)}>
+      <Dialog
+        open={!!renameTarget}
+        onOpenChange={(o) => !o && setRenameTarget(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Переименовать рецептуру</DialogTitle>
           </DialogHeader>
           <div className="space-y-1.5 py-2">
             <Label htmlFor="rename">Название</Label>
-            <Input id="rename" value={renameValue} onChange={(e) => setRenameValue(e.target.value)} autoFocus />
+            <Input
+              id="rename"
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              autoFocus
+            />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRenameTarget(null)}>Отмена</Button>
+            <Button variant="outline" onClick={() => setRenameTarget(null)}>
+              Отмена
+            </Button>
             <Button onClick={doRename}>Сохранить</Button>
           </DialogFooter>
         </DialogContent>
@@ -276,15 +367,24 @@ export default function SavedRecipesPage() {
   )
 }
 
-function FilterButton({ active, onClick, label, count }: {
-  active: boolean; onClick: () => void; label: string; count: number
+function FilterButton({
+  active,
+  onClick,
+  label,
+  count,
+}: {
+  active: boolean
+  onClick: () => void
+  label: string
+  count: number
 }) {
   return (
     <button
       onClick={onClick}
       className={cn(
         'flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left text-sm transition-colors',
-        active ? 'bg-accent text-accent-foreground font-medium'
+        active
+          ? 'bg-accent text-accent-foreground font-medium'
           : 'text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground',
       )}
     >
@@ -303,7 +403,11 @@ function Metric({ label, value }: { label: string; value: string }) {
   )
 }
 
-function CreateGroupDialog({ onCreate }: { onCreate: (name: string) => Promise<void> }) {
+function CreateGroupDialog({
+  onCreate,
+}: {
+  onCreate: (name: string) => Promise<void>
+}) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [saving, setSaving] = useState(false)
@@ -317,7 +421,9 @@ function CreateGroupDialog({ onCreate }: { onCreate: (name: string) => Promise<v
       setName('')
       setOpen(false)
     } catch (e) {
-      toast.error('Не удалось создать группу', { description: e instanceof Error ? e.message : String(e) })
+      toast.error('Не удалось создать группу', {
+        description: e instanceof Error ? e.message : String(e),
+      })
     } finally {
       setSaving(false)
     }
@@ -326,24 +432,47 @@ function CreateGroupDialog({ onCreate }: { onCreate: (name: string) => Promise<v
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-muted-foreground mt-1 w-full justify-start">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground mt-1 w-full justify-start"
+        >
           <FolderPlus className="mr-1.5 h-4 w-4" /> Новая группа
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Новая группа</DialogTitle>
-          <DialogDescription>Группы помогают организовать рецептуры, как плейлисты.</DialogDescription>
+          <DialogDescription>
+            Группы помогают организовать рецептуры, как плейлисты.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-1.5 py-2">
           <Label htmlFor="group-name">Название группы</Label>
-          <Input id="group-name" value={name} onChange={(e) => setName(e.target.value)}
-            placeholder="Напр.: Мясные рецептуры" autoFocus />
+          <Input
+            id="group-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Напр.: Мясные рецептуры"
+            autoFocus
+          />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>Отмена</Button>
+          <Button
+            variant="outline"
+            onClick={() => setOpen(false)}
+            disabled={saving}
+          >
+            Отмена
+          </Button>
           <Button onClick={submit} disabled={saving}>
-            {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Создание…</> : 'Создать'}
+            {saving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Создание…
+              </>
+            ) : (
+              'Создать'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

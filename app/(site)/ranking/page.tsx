@@ -5,24 +5,49 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Sparkles, Loader2, Trophy, Bookmark, Check } from 'lucide-react'
 import {
-  BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LabelList,
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+  LabelList,
 } from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { savedApi } from '@/lib/api'
-import type { SavedRecipe, SavedGroup, RankingResult } from '@/modules/saved/api'
+import type {
+  SavedRecipe,
+  SavedGroup,
+  RankingResult,
+} from '@/modules/saved/api'
 import { useAuth } from '@/lib/auth-context'
 
 function nf(n: number | null | undefined, d = 1): string {
   if (n === null || n === undefined) return '—'
-  return n.toLocaleString('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d })
+  return n.toLocaleString('ru-RU', {
+    minimumFractionDigits: d,
+    maximumFractionDigits: d,
+  })
 }
 
 export default function RankingPage() {
@@ -42,11 +67,16 @@ export default function RankingPage() {
 
   const load = useCallback(async () => {
     try {
-      const [rs, gs] = await Promise.all([savedApi.recipes(), savedApi.groups()])
+      const [rs, gs] = await Promise.all([
+        savedApi.recipes(),
+        savedApi.groups(),
+      ])
       setRecipes(rs)
       setGroups(gs)
     } catch (e) {
-      toast.error('Не удалось загрузить рецептуры', { description: e instanceof Error ? e.message : String(e) })
+      toast.error('Не удалось загрузить рецептуры', {
+        description: e instanceof Error ? e.message : String(e),
+      })
     } finally {
       setLoading(false)
     }
@@ -59,14 +89,14 @@ export default function RankingPage() {
     })()
   }, [isAuthenticated, load])
 
-  const groupName = (id: string | null) => groups.find((g) => g.id === id)?.name ?? null
+  const groupName = (id: string | null) =>
+    groups.find((g) => g.id === id)?.name ?? null
   // В ранжировании участвуют только рассчитанные рецептуры (у черновиков нет показателей).
   const computable = recipes.filter((r) => r.metrics?.bc != null)
   const draftCount = recipes.length - computable.length
   const selectedIds = Object.keys(selected).filter((id) => selected[id])
 
-  const toggle = (id: string) =>
-    setSelected((s) => ({ ...s, [id]: !s[id] }))
+  const toggle = (id: string) => setSelected((s) => ({ ...s, [id]: !s[id] }))
   const toggleAll = () => {
     if (selectedIds.length === computable.length) setSelected({})
     else setSelected(Object.fromEntries(computable.map((r) => [r.id, true])))
@@ -81,9 +111,17 @@ export default function RankingPage() {
     try {
       const res = await savedApi.ranking({ recipe_ids: selectedIds })
       setResult(res)
-      setTimeout(() => document.getElementById('ranking-results')?.scrollIntoView({ behavior: 'smooth' }), 50)
+      setTimeout(
+        () =>
+          document
+            .getElementById('ranking-results')
+            ?.scrollIntoView({ behavior: 'smooth' }),
+        50,
+      )
     } catch (e) {
-      toast.error('Ранжирование не выполнено', { description: e instanceof Error ? e.message : String(e) })
+      toast.error('Ранжирование не выполнено', {
+        description: e instanceof Error ? e.message : String(e),
+      })
     } finally {
       setRunning(false)
     }
@@ -113,12 +151,14 @@ export default function RankingPage() {
             Ранжирование рецептур
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Выберите сохранённые рецептуры — программа определит лучшую по показателям
-            БЦ, КРАС, U и G и построит градацию от лучшей к худшей.
+            Выберите сохранённые рецептуры — программа определит лучшую по
+            показателям БЦ, КРАС, U и G и построит градацию от лучшей к худшей.
           </p>
         </div>
         <Button asChild variant="outline">
-          <Link href="/saved-recipes"><Bookmark className="mr-1.5 h-4 w-4" /> К рецептурам</Link>
+          <Link href="/saved-recipes">
+            <Bookmark className="mr-1.5 h-4 w-4" /> К рецептурам
+          </Link>
         </Button>
       </div>
 
@@ -131,9 +171,12 @@ export default function RankingPage() {
           <CardContent className="text-muted-foreground py-16 text-center">
             Для ранжирования нужно минимум две рассчитанные рецептуры. Сейчас их{' '}
             {computable.length}
-            {draftCount > 0 && ` (черновиков без расчёта: ${draftCount})`}. Сохраните рецептуры с
-            расчётом в{' '}
-            <Link href="/calculator" className="text-primary underline">калькуляторе</Link>.
+            {draftCount > 0 && ` (черновиков без расчёта: ${draftCount})`}.
+            Сохраните рецептуры с расчётом в{' '}
+            <Link href="/calculator" className="text-primary underline">
+              калькуляторе
+            </Link>
+            .
           </CardContent>
         </Card>
       ) : (
@@ -146,17 +189,31 @@ export default function RankingPage() {
                   <CardTitle>Выбор рецептур</CardTitle>
                   <CardDescription>
                     Отметьте рецептуры для сравнения (минимум 2).
-                    {draftCount > 0 && ` Черновики без расчёта (${draftCount}) не участвуют.`}
+                    {draftCount > 0 &&
+                      ` Черновики без расчёта (${draftCount}) не участвуют.`}
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={toggleAll}>
-                    {selectedIds.length === computable.length ? 'Снять выделение' : 'Выбрать все'}
+                    {selectedIds.length === computable.length
+                      ? 'Снять выделение'
+                      : 'Выбрать все'}
                   </Button>
-                  <Button onClick={run} disabled={running || selectedIds.length < 2}>
-                    {running
-                      ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Расчёт…</>
-                      : <><Sparkles className="mr-2 h-4 w-4" /> Ранжировать рецептуры</>}
+                  <Button
+                    onClick={run}
+                    disabled={running || selectedIds.length < 2}
+                  >
+                    {running ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}
+                        Расчёт…
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-4 w-4" /> Ранжировать
+                        рецептуры
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -168,22 +225,30 @@ export default function RankingPage() {
                     key={r.id}
                     className={cn(
                       'flex cursor-pointer items-center gap-3 rounded-md border p-3 transition-colors',
-                      selected[r.id] ? 'border-primary bg-primary/5' : 'hover:bg-accent/40',
+                      selected[r.id]
+                        ? 'border-primary bg-primary/5'
+                        : 'hover:bg-accent/40',
                     )}
                   >
-                    <Checkbox checked={!!selected[r.id]} onCheckedChange={() => toggle(r.id)} />
+                    <Checkbox
+                      checked={!!selected[r.id]}
+                      onCheckedChange={() => toggle(r.id)}
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="truncate font-medium">{r.name}</span>
                         {groupName(r.group_id) && (
-                          <Badge variant="secondary" className="shrink-0 text-[10px]">
+                          <Badge
+                            variant="secondary"
+                            className="shrink-0 text-[10px]"
+                          >
                             {groupName(r.group_id)}
                           </Badge>
                         )}
                       </div>
                       <div className="text-muted-foreground mt-0.5 text-xs">
-                        БЦ {nf(r.metrics?.bc)} · КРАС {nf(r.metrics?.kras)} ·
-                        U {nf(r.metrics?.V, 2)} · G {nf(r.metrics?.G, 2)}
+                        БЦ {nf(r.metrics?.bc)} · КРАС {nf(r.metrics?.kras)} · U{' '}
+                        {nf(r.metrics?.V, 2)} · G {nf(r.metrics?.G, 2)}
                       </div>
                     </div>
                   </label>
@@ -206,11 +271,17 @@ export default function RankingPage() {
                     <div>
                       <div className="text-2xl font-bold">{winner.name}</div>
                       {winner.group && (
-                        <Badge variant="secondary" className="mt-1">{winner.group}</Badge>
+                        <Badge variant="secondary" className="mt-1">
+                          {winner.group}
+                        </Badge>
                       )}
                     </div>
                     <div className="grid grid-cols-5 gap-4 text-center">
-                      <BigMetric label="Балл" value={nf(winner.composite * 100, 0)} accent />
+                      <BigMetric
+                        label="Балл"
+                        value={nf(winner.composite * 100, 0)}
+                        accent
+                      />
                       <BigMetric label="БЦ, %" value={nf(winner.bc)} />
                       <BigMetric label="КРАС, %" value={nf(winner.kras)} />
                       <BigMetric label="U" value={nf(winner.V, 2)} />
@@ -225,21 +296,34 @@ export default function RankingPage() {
                 <CardHeader>
                   <CardTitle>Композитный балл (0–100)</CardTitle>
                   <CardDescription>
-                    Нормировка БЦ↑, КРАС↓, U↑, G↓ по выбранным рецептурам, равные веса.
+                    Нормировка БЦ↑, КРАС↓, U↑, G↓ по выбранным рецептурам,
+                    равные веса.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="h-64 w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData} margin={{ top: 16, right: 8, bottom: 8, left: 8 }}>
+                      <BarChart
+                        data={chartData}
+                        margin={{ top: 16, right: 8, bottom: 8, left: 8 }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                         <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
                         <Bar dataKey="composite" radius={[4, 4, 0, 0]}>
                           {chartData.map((d, i: number) => (
-                            <Cell key={i} fill={d.isWinner ? 'var(--success)' : 'var(--chart-1)'} />
+                            <Cell
+                              key={i}
+                              fill={
+                                d.isWinner ? 'var(--success)' : 'var(--chart-1)'
+                              }
+                            />
                           ))}
-                          <LabelList dataKey="composite" position="top" style={{ fontSize: 11 }} />
+                          <LabelList
+                            dataKey="composite"
+                            position="top"
+                            style={{ fontSize: 11 }}
+                          />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
@@ -269,23 +353,39 @@ export default function RankingPage() {
                       {result.ranking.map((x) => (
                         <TableRow
                           key={x.recipe_id}
-                          className={cn(x.recipe_id === result.winner && 'bg-success/10')}
+                          className={cn(
+                            x.recipe_id === result.winner && 'bg-success/10',
+                          )}
                         >
                           <TableCell className="font-medium">
                             {x.rank === 1 ? (
                               <span className="text-success inline-flex items-center gap-1">
                                 <Check className="h-4 w-4" />1
                               </span>
-                            ) : x.rank}
+                            ) : (
+                              x.rank
+                            )}
                           </TableCell>
                           <TableCell>
                             <span className="font-medium">{x.name}</span>
-                            {x.group && <span className="text-muted-foreground ml-1.5 text-xs">· {x.group}</span>}
+                            {x.group && (
+                              <span className="text-muted-foreground ml-1.5 text-xs">
+                                · {x.group}
+                              </span>
+                            )}
                           </TableCell>
-                          <TableCell className="text-right">{nf(x.bc)}</TableCell>
-                          <TableCell className="text-right">{nf(x.kras)}</TableCell>
-                          <TableCell className="text-right">{nf(x.V, 2)}</TableCell>
-                          <TableCell className="text-right">{nf(x.G, 2)}</TableCell>
+                          <TableCell className="text-right">
+                            {nf(x.bc)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {nf(x.kras)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {nf(x.V, 2)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {nf(x.G, 2)}
+                          </TableCell>
                           <TableCell className="text-right font-semibold">
                             {nf(x.composite * 100, 0)}
                           </TableCell>
@@ -303,10 +403,20 @@ export default function RankingPage() {
   )
 }
 
-function BigMetric({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+function BigMetric({
+  label,
+  value,
+  accent,
+}: {
+  label: string
+  value: string
+  accent?: boolean
+}) {
   return (
     <div>
-      <div className={cn('text-xl font-bold', accent && 'text-primary')}>{value}</div>
+      <div className={cn('text-xl font-bold', accent && 'text-primary')}>
+        {value}
+      </div>
       <div className="text-muted-foreground text-xs">{label}</div>
     </div>
   )

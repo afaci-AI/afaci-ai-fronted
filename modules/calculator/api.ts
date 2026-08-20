@@ -1,8 +1,14 @@
 import { fetchApi } from '@/shared/api/client'
 import type { SavedRecipeDetail } from '@/modules/saved/api'
 
-export interface CalcItem { product_id: string; amount_g: number }
-export interface CalcRequest { reference_protein_id: string; items: CalcItem[] }
+export interface CalcItem {
+  product_id: string
+  amount_g: number
+}
+export interface CalcRequest {
+  reference_protein_id: string
+  items: CalcItem[]
+}
 
 export interface CandidateIn {
   product_id: string
@@ -58,7 +64,13 @@ export interface ComputeVerdict {
 }
 
 export interface ComputeResult {
-  macro: { protein: number; fat: number; carb: number; fiber: number; protein_fat_ratio: number }
+  macro: {
+    protein: number
+    fat: number
+    carb: number
+    fiber: number
+    protein_fat_ratio: number
+  }
   quality: { bc: number; kras: number; V: number; G: number }
   amino_acids: AminoAcidResult[]
   energy_kcal: number
@@ -79,10 +91,17 @@ export interface OptimizeResult {
 }
 
 export const calculatorApi = {
-  referenceProteins: () => fetchApi<ReferenceProtein[]>('/calculator/reference-proteins'),
+  referenceProteins: () =>
+    fetchApi<ReferenceProtein[]>('/calculator/reference-proteins'),
   recipes: () => fetchApi<SavedRecipeDetail[]>('/calculator/recipes'),
   compute: (body: CalcRequest) =>
-    fetchApi<ComputeResult>('/calculator/compute', { method: 'POST', body: JSON.stringify(body) }),
+    fetchApi<ComputeResult>('/calculator/compute', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
   optimizeCost: (body: OptimizeCostRequest) =>
-    fetchApi<OptimizeResult>('/calculator/optimize-cost', { method: 'POST', body: JSON.stringify(body) }),
+    fetchApi<OptimizeResult>('/calculator/optimize-cost', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
 }

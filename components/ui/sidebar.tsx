@@ -80,7 +80,8 @@ function SidebarProvider({
   }, [open])
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
-      const openState = typeof value === 'function' ? value(openRef.current) : value
+      const openState =
+        typeof value === 'function' ? value(openRef.current) : value
       if (setOpenProp) {
         setOpenProp(openState)
       } else {

@@ -17,7 +17,7 @@ export interface User {
 type Permission = 'canEditProducts' | 'canManageDictionaries' | 'canManageUsers'
 
 const rolePermissions: Record<UserRole, Permission[]> = {
-  admin:  ['canEditProducts', 'canManageDictionaries', 'canManageUsers'],
+  admin: ['canEditProducts', 'canManageDictionaries', 'canManageUsers'],
   editor: ['canEditProducts', 'canManageDictionaries'],
   viewer: [],
 }
