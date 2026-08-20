@@ -79,9 +79,6 @@ jobs:
           DOCKER_HOST: ${{ secrets.DOCKER_HOST }}
           BACKEND_URL: ${{ secrets.BACKEND_URL }}
           FRONTEND_IMAGE: ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.IMAGE_NAME }}:${{ github.sha }}
-        run: |
-          pwd
-          ls -la
-          docker compose -f - up -d --pull always < docker-compose.yml  
+        run: docker compose -f - up -d --pull always < docker-compose.yml  
     
     
