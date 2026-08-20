@@ -185,7 +185,7 @@ export default function NutrientNamesPage() {
               onEdit={canEdit ? handleEdit : undefined}
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет нутриентов"
               emptyDescription="Добавьте первый нутриент"
             />
@@ -208,7 +208,6 @@ export default function NutrientNamesPage() {
           onOpenChange={setDeleteOpen}
           title={`Удалить нутриент "${selectedItem?.name}"?`}
           onConfirm={handleConfirmDelete}
-          loading={saving}
         />
       </main>
     </>

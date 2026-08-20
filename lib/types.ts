@@ -14,11 +14,20 @@ export interface User {
   lastLoginAt?: string
 }
 
-type Permission = 'canEditProducts' | 'canManageDictionaries' | 'canManageUsers'
+type Permission =
+  | 'canEditProducts'
+  | 'canManageDictionaries'
+  | 'canEditDictionaries'
+  | 'canManageUsers'
 
 const rolePermissions: Record<UserRole, Permission[]> = {
-  admin: ['canEditProducts', 'canManageDictionaries', 'canManageUsers'],
-  editor: ['canEditProducts', 'canManageDictionaries'],
+  admin: [
+    'canEditProducts',
+    'canManageDictionaries',
+    'canEditDictionaries',
+    'canManageUsers',
+  ],
+  editor: ['canEditProducts', 'canManageDictionaries', 'canEditDictionaries'],
   viewer: [],
 }
 

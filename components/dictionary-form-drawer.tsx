@@ -47,9 +47,10 @@ interface DictionaryFormDrawerProps<T> {
   onSave: (data: Record<string, string>) => Promise<void>
   existingValues?: string[]
   duplicateField?: string
+  saving?: boolean
 }
 
-export function DictionaryFormDrawer<T extends Record<string, unknown>>({
+export function DictionaryFormDrawer<T extends object>({
   open,
   onOpenChange,
   title,
@@ -59,6 +60,7 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
   onSave,
   existingValues = [],
   duplicateField,
+  saving = false,
 }: DictionaryFormDrawerProps<T>) {
   const [formData, setFormData] = useState<Record<string, string>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -68,8 +70,9 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
 
   const buildInitialData = (): Record<string, string> => {
     const initialData: Record<string, string> = {}
+    const dataRecord = data as Record<string, unknown> | null | undefined
     fields.forEach((field) => {
-      initialData[field.key] = String(data?.[field.key] ?? '')
+      initialData[field.key] = String(dataRecord?.[field.key] ?? '')
     })
     return initialData
   }
@@ -115,7 +118,12 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
         value &&
         existingValues.includes(value.toLowerCase()) &&
         (!isEdit ||
-          value.toLowerCase() !== String(data?.[duplicateField]).toLowerCase())
+          value.toLowerCase() !==
+            String(
+              (data as Record<string, unknown> | null | undefined)?.[
+                duplicateField
+              ],
+            ).toLowerCase())
       ) {
         newErrors[field.key] = 'Такое значение уже существует'
       }
@@ -217,11 +225,11 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || saving}
             >
               Отмена
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || saving}>
               {isSubmitting && <Spinner className="mr-2" />}
               {isEdit ? 'Сохранить' : 'Добавить'}
             </Button>

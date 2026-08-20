@@ -31,7 +31,6 @@ export default function ProductsPage() {
   const [error, setError] = useState<string | null>(null)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [deleting, setDeleting] = useState(false)
 
   const loadData = useCallback(async () => {
     try {
@@ -114,7 +113,6 @@ export default function ProductsPage() {
 
   const handleConfirmDelete = async () => {
     if (!selectedProduct) return
-    setDeleting(true)
     try {
       await productsApi.delete(selectedProduct.id)
       await loadData()
@@ -122,8 +120,6 @@ export default function ProductsPage() {
       setSelectedProduct(null)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Ошибка удаления')
-    } finally {
-      setDeleting(false)
     }
   }
 
@@ -180,7 +176,7 @@ export default function ProductsPage() {
               }
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет продуктов"
               emptyDescription="Добавьте первый продукт в базу данных"
             />
@@ -193,7 +189,6 @@ export default function ProductsPage() {
           title={`Удалить продукт "${selectedProduct?.name}"?`}
           description="Все связанные нутриенты также будут удалены. Это действие нельзя отменить."
           onConfirm={handleConfirmDelete}
-          loading={deleting}
         />
       </main>
     </>

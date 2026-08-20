@@ -54,7 +54,7 @@ export default function RegionsPage() {
 
   const columns: Column<Region>[] = [
     { key: 'name', label: 'Название', sortable: true },
-    { key: 'id', label: 'ID', width: 'text-xs text-muted-foreground' },
+    { key: 'id', label: 'ID', className: 'text-xs text-muted-foreground' },
   ]
 
   const formFields: FormField[] = [
@@ -155,7 +155,7 @@ export default function RegionsPage() {
               onEdit={canEdit ? handleEdit : undefined}
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет регионов"
               emptyDescription="Добавьте первый регион"
             />
@@ -178,7 +178,6 @@ export default function RegionsPage() {
           onOpenChange={setDeleteOpen}
           title={`Удалить регион "${selectedItem?.name}"?`}
           onConfirm={handleConfirmDelete}
-          loading={saving}
         />
       </main>
     </>

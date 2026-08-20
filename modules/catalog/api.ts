@@ -38,7 +38,7 @@ export const subcategoriesApi = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-  update: (id: string, data: { name?: string }) =>
+  update: (id: string, data: { name?: string; category_id?: string }) =>
     fetchApi<Subcategory>(`/subcategories/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),

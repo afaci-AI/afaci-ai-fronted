@@ -656,7 +656,6 @@ export default function ProductDetailPage({
           title="Удалить нутриент?"
           description="Эта запись о нутриенте будет удалена из продукта."
           onConfirm={handleConfirmDelete}
-          loading={isSubmitting}
         />
       </main>
     </>

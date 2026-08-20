@@ -54,7 +54,7 @@ export default function UnitsPage() {
 
   const columns: Column<Unit>[] = [
     { key: 'name', label: 'Название', sortable: true },
-    { key: 'id', label: 'ID', width: 'text-xs text-muted-foreground' },
+    { key: 'id', label: 'ID', className: 'text-xs text-muted-foreground' },
   ]
 
   const formFields: FormField[] = [
@@ -155,7 +155,7 @@ export default function UnitsPage() {
               onEdit={canEdit ? handleEdit : undefined}
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет единиц измерения"
               emptyDescription="Добавьте первую единицу"
             />
@@ -182,7 +182,6 @@ export default function UnitsPage() {
           onOpenChange={setDeleteOpen}
           title={`Удалить единицу "${selectedItem?.name}"?`}
           onConfirm={handleConfirmDelete}
-          loading={saving}
         />
       </main>
     </>

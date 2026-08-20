@@ -115,9 +115,15 @@ export default function SubcategoriesPage() {
     setSaving(true)
     try {
       if (selectedItem) {
-        await subcategoriesApi.update(selectedItem.id, { name: data.name })
+        await subcategoriesApi.update(selectedItem.id, {
+          name: data.name,
+          category_id: data.category_id,
+        })
       } else {
-        await subcategoriesApi.create({ name: data.name })
+        await subcategoriesApi.create({
+          name: data.name,
+          category_id: data.category_id,
+        })
       }
       await loadData()
       setDrawerOpen(false)
@@ -189,7 +195,7 @@ export default function SubcategoriesPage() {
               onEdit={canEdit ? handleEdit : undefined}
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет подкатегорий"
               emptyDescription="Добавьте первую подкатегорию"
             />
@@ -216,7 +222,6 @@ export default function SubcategoriesPage() {
           onOpenChange={setDeleteOpen}
           title={`Удалить подкатегорию "${selectedItem?.name}"?`}
           onConfirm={handleConfirmDelete}
-          loading={saving}
         />
       </main>
     </>

@@ -155,7 +155,7 @@ export default function NutrientTypesPage() {
               onEdit={canEdit ? handleEdit : undefined}
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет типов нутриентов"
               emptyDescription="Добавьте первый тип"
             />
@@ -178,7 +178,6 @@ export default function NutrientTypesPage() {
           onOpenChange={setDeleteOpen}
           title={`Удалить тип "${selectedItem?.name}"?`}
           onConfirm={handleConfirmDelete}
-          loading={saving}
         />
       </main>
     </>

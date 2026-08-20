@@ -24,7 +24,7 @@ import type { Category } from '@/lib/types'
 
 const columns: Column<Category>[] = [
   { key: 'name', label: 'Название', sortable: true },
-  { key: 'id', label: 'ID', width: 'text-xs text-muted-foreground' },
+  { key: 'id', label: 'ID', className: 'text-xs text-muted-foreground' },
 ]
 
 const formFields: FormField[] = [
@@ -157,7 +157,7 @@ export default function CategoriesPage() {
               onEdit={canEdit ? handleEdit : undefined}
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет категорий"
               emptyDescription="Добавьте первую категорию"
             />
@@ -184,7 +184,6 @@ export default function CategoriesPage() {
           onOpenChange={setDeleteOpen}
           title={`Удалить категорию "${selectedItem?.name}"?`}
           onConfirm={handleConfirmDelete}
-          loading={saving}
         />
       </main>
     </>
