@@ -12,10 +12,11 @@ import {
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import { nf, COL } from '../_lib/utils'
+import type { ComputeResult, ComputeVerdict } from '../api'
 import { StatCard } from './StatCard'
 import { FormulaHint } from './FormulaHint'
 
-function VerdictCard({ verdict }: { verdict: any }) {
+function VerdictCard({ verdict }: { verdict: ComputeVerdict }) {
   const styles: Record<string, { card: string; icon: string; badge: string; label: string }> = {
     good:     { card: 'border-success/40 bg-success/5',       icon: 'text-success',          badge: 'bg-success/15 text-success',          label: 'Высокое качество' },
     moderate: { card: 'border-warning/40 bg-warning/5',       icon: 'text-warning-foreground', badge: 'bg-warning/20 text-warning-foreground', label: 'Удовлетворительно' },
@@ -58,7 +59,7 @@ function QualityCard({ label, value, hint }: { label: string; value: string; hin
   )
 }
 
-export function Results({ result }: { result: any }) {
+export function Results({ result }: { result: ComputeResult }) {
   const m = result.macro
   const q = result.quality
   const macroData = [
@@ -67,14 +68,14 @@ export function Results({ result }: { result: any }) {
     { name: 'Углеводы',    value: m.carb,    color: COL.carb },
     { name: 'Пищ. волокна', value: m.fiber,  color: COL.fiber },
   ]
-  const sortedAmino = [...result.amino_acids].sort((a: any, b: any) => a.score - b.score)
-  const scoreData = sortedAmino.map((a: any) => ({
+  const sortedAmino = [...result.amino_acids].sort((a, b) => a.score - b.score)
+  const scoreData = sortedAmino.map((a) => ({
     name: a.name, score: a.score, m_j: a.m_j, is_min: a.is_min,
     color: a.is_min ? COL.min : (a.score >= 100 ? COL.good : COL.score),
   }))
   const utilData = sortedAmino
-    .filter((a: any) => a.utility != null)
-    .map((a: any) => ({ name: a.name, utility: a.utility, is_min: a.is_min, color: a.is_min ? COL.min : COL.score }))
+    .filter((a) => a.utility != null)
+    .map((a) => ({ name: a.name, utility: a.utility, is_min: a.is_min, color: a.is_min ? COL.min : COL.score }))
   const bcData = [{ name: 'белок', bc: q.bc, kras: q.kras }]
 
   return (
@@ -104,7 +105,7 @@ export function Results({ result }: { result: any }) {
         />
       </div>
 
-      {result.warnings?.length > 0 && (
+      {result.warnings != null && result.warnings.length > 0 && (
         <div className="border-warning/40 bg-warning/5 text-warning-foreground flex items-start gap-2 rounded-lg border p-3 text-sm">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>{result.warnings.map((w: string, i: number) => <p key={i}>{w}</p>)}</div>
@@ -129,7 +130,7 @@ export function Results({ result }: { result: any }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {result.recipe.map((it: any, i: number) => (
+              {result.recipe.map((it, i: number) => (
                 <TableRow key={i}>
                   <TableCell className="font-medium">{it.name}</TableCell>
                   <TableCell className="text-muted-foreground">{it.region ?? '—'}</TableCell>
@@ -170,7 +171,7 @@ export function Results({ result }: { result: any }) {
                     {macroData.map((d, i) => <Cell key={i} fill={d.color} />)}
                   </Pie>
                   <RTooltip
-                    formatter={(v: any, n: any) => [`${nf(v, 2)} г`, n]}
+                    formatter={(v, n) => [`${nf(Number(v), 2)} г`, n]}
                     contentStyle={{ borderRadius: 8, border: '1px solid var(--border)', background: 'var(--popover)' }}
                   />
                 </PieChart>
@@ -220,16 +221,16 @@ export function Results({ result }: { result: any }) {
                 <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
                 <YAxis tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
                 <RTooltip
-                  formatter={(v: any) => [`${nf(v, 1)} %`, 'Скор C']}
+                  formatter={(v) => [`${nf(Number(v), 1)} %`, 'Скор C']}
                   contentStyle={{ borderRadius: 8, border: '1px solid var(--border)', background: 'var(--popover)' }}
                 />
                 <ReferenceLine y={100} stroke="var(--muted-foreground)" strokeDasharray="5 4"
                   label={{ value: 'эталон 100%', position: 'right', fontSize: 11, fill: 'var(--muted-foreground)' }} />
                 <Bar dataKey="score" radius={[4, 4, 0, 0]}>
-                  {scoreData.map((d: any, i: number) => (
+                  {scoreData.map((d, i: number) => (
                     <Cell key={i} fill={d.color} stroke={d.is_min ? 'var(--destructive)' : 'transparent'} strokeWidth={d.is_min ? 2 : 0} />
                   ))}
-                  <LabelList dataKey="score" position="top" fontSize={11} formatter={(v: any) => nf(v, 0)} />
+                  <LabelList dataKey="score" position="top" fontSize={11} formatter={(v: number) => nf(Number(v), 0)} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -245,7 +246,7 @@ export function Results({ result }: { result: any }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedAmino.map((a: any) => (
+              {sortedAmino.map((a) => (
                 <TableRow key={a.name} className={cn(
                   a.is_min ? 'bg-destructive/15 border-l-[3px] border-destructive' : a.is_limiting ? 'bg-destructive/5' : '',
                 )}>
@@ -313,14 +314,14 @@ export function Results({ result }: { result: any }) {
                     <XAxis type="number" domain={[0, 100]} hide />
                     <YAxis type="category" dataKey="name" hide />
                     <RTooltip
-                      formatter={(v: any, n: any) => [`${nf(v, 1)} %`, n === 'bc' ? 'БЦ' : 'КРАС']}
+                      formatter={(v, n) => [`${nf(Number(v), 1)} %`, n === 'bc' ? 'БЦ' : 'КРАС']}
                       contentStyle={{ borderRadius: 8, border: '1px solid var(--border)', background: 'var(--popover)' }}
                     />
                     <Bar dataKey="bc" stackId="a" fill={COL.bc} radius={[6, 0, 0, 6]}>
-                      <LabelList dataKey="bc" position="center" fontSize={13} fill="#fff" formatter={(v: any) => `БЦ ${nf(v, 1)}%`} />
+                      <LabelList dataKey="bc" position="center" fontSize={13} fill="#fff" formatter={(v: number) => `БЦ ${nf(Number(v), 1)}%`} />
                     </Bar>
                     <Bar dataKey="kras" stackId="a" fill={COL.kras} radius={[0, 6, 6, 0]}>
-                      <LabelList dataKey="kras" position="center" fontSize={13} fill="#fff" formatter={(v: any) => `КРАС ${nf(v, 1)}%`} />
+                      <LabelList dataKey="kras" position="center" fontSize={13} fill="#fff" formatter={(v: number) => `КРАС ${nf(Number(v), 1)}%`} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -338,11 +339,11 @@ export function Results({ result }: { result: any }) {
                     <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} />
                     <YAxis domain={[0, 1]} tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} />
                     <RTooltip
-                      formatter={(v: any) => [nf(v, 2), 'αⱼ']}
+                      formatter={(v) => [nf(Number(v), 2), 'αⱼ']}
                       contentStyle={{ borderRadius: 8, border: '1px solid var(--border)', background: 'var(--popover)' }}
                     />
                     <Bar dataKey="utility" radius={[3, 3, 0, 0]}>
-                      {utilData.map((d: any, i: number) => <Cell key={i} fill={d.color} />)}
+                      {utilData.map((d, i: number) => <Cell key={i} fill={d.color} />)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>

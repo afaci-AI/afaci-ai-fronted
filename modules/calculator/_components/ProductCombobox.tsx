@@ -8,13 +8,14 @@ import {
 } from '@/components/ui/command'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import type { CalcProduct } from '@/modules/products/api'
 
 export function ProductCombobox({
   value, onChange, products,
 }: {
   value: string
   onChange: (id: string) => void
-  products: any[]
+  products: CalcProduct[]
 }) {
   const [open, setOpen] = useState(false)
   const selected = products.find((p) => p.product_id === value)

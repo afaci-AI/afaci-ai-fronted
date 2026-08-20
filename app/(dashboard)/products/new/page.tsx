@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -42,11 +42,7 @@ export default function NewProductPage() {
   const [regions, setRegions] = useState<Region[]>([])
   const [subcategories, setSubcategories] = useState<Subcategory[]>([])
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [cats, regs, subcats] = await Promise.all([
         categoriesApi.list(),
@@ -56,12 +52,18 @@ export default function NewProductPage() {
       setCategories(cats)
       setRegions(regs)
       setSubcategories(subcats)
-    } catch (e) {
+    } catch {
       toast.error('Ошибка загрузки данных')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      await loadData()
+    })()
+  }, [loadData])
 
   const availableSubcategories = formData.category_id
     ? subcategories.filter(s => s.category_id === formData.category_id)
@@ -110,7 +112,7 @@ export default function NewProductPage() {
       })
       toast.success('Продукт создан')
       router.push('/products')
-    } catch (error) {
+    } catch {
       toast.error('Не удалось создать продукт')
     } finally {
       setIsSubmitting(false)

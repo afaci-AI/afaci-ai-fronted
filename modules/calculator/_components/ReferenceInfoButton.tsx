@@ -6,8 +6,9 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { nf } from '../_lib/utils'
+import type { ReferenceProtein } from '../api'
 
-export function ReferenceInfoButton({ reference }: { reference: any }) {
+export function ReferenceInfoButton({ reference }: { reference: ReferenceProtein }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -40,7 +41,7 @@ export function ReferenceInfoButton({ reference }: { reference: any }) {
               Таблица 4 — профиль эталона, г/100 г белка
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {reference.values.map((v: any) => (
+              {reference.values.map((v) => (
                 <div key={v.amino_acid} className="rounded-md border p-2 text-center">
                   <div className="text-muted-foreground text-[11px]">{v.amino_acid}</div>
                   <div className="font-semibold">{nf(v.value, 1)}</div>

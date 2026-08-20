@@ -34,28 +34,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Восстановление сессии при загрузке: токен + кэш пользователя, затем проверка /me.
   useEffect(() => {
+    let cancelled = false
     const token = getToken()
-    if (!token) {
-      setIsLoading(false)
-      return
+
+    ;(async () => {
+      if (token) {
+        const cached = typeof window !== 'undefined' ? window.localStorage.getItem(USER_KEY) : null
+        if (cached) {
+          try {
+            const cachedUser = JSON.parse(cached) as User
+            if (!cancelled) setUser(cachedUser)
+          } catch {
+            // ignore malformed cache
+          }
+        }
+        try {
+          const u = await authApi.me()
+          const mapped = toUser(u)
+          if (!cancelled) {
+            setUser(mapped)
+            window.localStorage.setItem(USER_KEY, JSON.stringify(mapped))
+          }
+        } catch {
+          // токен недействителен — выходим
+          if (!cancelled) {
+            setToken(null)
+            window.localStorage.removeItem(USER_KEY)
+            setUser(null)
+          }
+        }
+      }
+      if (!cancelled) setIsLoading(false)
+    })()
+
+    return () => {
+      cancelled = true
     }
-    const cached = typeof window !== 'undefined' ? window.localStorage.getItem(USER_KEY) : null
-    if (cached) {
-      try { setUser(JSON.parse(cached)) } catch { /* ignore */ }
-    }
-    authApi.me()
-      .then((u) => {
-        const mapped = toUser(u)
-        setUser(mapped)
-        window.localStorage.setItem(USER_KEY, JSON.stringify(mapped))
-      })
-      .catch(() => {
-        // токен недействителен — выходим
-        setToken(null)
-        window.localStorage.removeItem(USER_KEY)
-        setUser(null)
-      })
-      .finally(() => setIsLoading(false))
   }, [])
 
   const persist = useCallback((token: string, u: AuthUser) => {

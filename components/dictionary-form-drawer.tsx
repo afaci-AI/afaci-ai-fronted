@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import {
   Sheet,
@@ -61,20 +61,24 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
 
   const isEdit = !!data
 
-  useEffect(() => {
+  const buildInitialData = (): Record<string, string> => {
+    const initialData: Record<string, string> = {}
+    fields.forEach((field) => {
+      initialData[field.key] = String(data?.[field.key] ?? '')
+    })
+    return initialData
+  }
+
+  // Сброс формы при открытии: синхронное обновление состояния во время рендера
+  // вместо эффекта, чтобы избежать каскадного рендера.
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (open !== prevOpen) {
+    setPrevOpen(open)
     if (open) {
-      if (data) {
-        const initialData: Record<string, string> = {}
-        fields.forEach((field) => {
-          initialData[field.key] = String(data[field.key] ?? '')
-        })
-        setFormData(initialData)
-      } else {
-        setFormData({})
-      }
+      setFormData(data ? buildInitialData() : {})
       setErrors({})
     }
-  }, [open, data, fields])
+  }
 
   const handleChange = (key: string, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }))

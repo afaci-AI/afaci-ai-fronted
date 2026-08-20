@@ -1,11 +1,12 @@
 'use client'
 
+import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function StatCard({
   label, value, sub, accent, icon: Icon,
 }: {
-  label: string; value: React.ReactNode; sub?: string; accent?: 'min' | 'good' | 'primary'; icon?: any
+  label: string; value: React.ReactNode; sub?: string; accent?: 'min' | 'good' | 'primary'; icon?: LucideIcon
 }) {
   const ring =
     accent === 'min' ? 'border-destructive/40 bg-destructive/5'

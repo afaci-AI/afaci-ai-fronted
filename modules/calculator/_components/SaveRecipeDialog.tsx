@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { savedApi } from '@/modules/saved/api'
+import type { SavedGroup, SaveRecipeBody, UpdateRecipeBody } from '@/modules/saved/api'
 
 const NO_GROUP = '__none__'
 const NEW_GROUP = '__new__'
@@ -26,7 +27,7 @@ export function SaveRecipeDialog({
   computable?: boolean
 }) {
   const [open, setOpen] = useState(false)
-  const [groups, setGroups] = useState<any[]>([])
+  const [groups, setGroups] = useState<SavedGroup[]>([])
   const [name, setName] = useState('')
   const [groupChoice, setGroupChoice] = useState<string>(NO_GROUP)
   const [newGroupName, setNewGroupName] = useState('')
@@ -37,11 +38,17 @@ export function SaveRecipeDialog({
   useEffect(() => {
     if (!open) return
     savedApi.groups().then(setGroups).catch(() => setGroups([]))
-    if (editing) {
+  }, [open])
+
+  // Заполнение формы при открытии на редактирование: синхронное обновление состояния во время рендера.
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (open !== prevOpen) {
+    setPrevOpen(open)
+    if (open && editing) {
       setName(editing.name)
       setGroupChoice(editing.group_id ?? NO_GROUP)
     }
-  }, [open, editing])
+  }
 
   const persist = async (asNew: boolean) => {
     if (!name.trim()) { toast.error('Укажите название рецептуры'); return }
@@ -49,7 +56,7 @@ export function SaveRecipeDialog({
     setSaving(true)
     try {
       if (isEdit && !asNew) {
-        const body: any = {
+        const body: UpdateRecipeBody = {
           name: name.trim(),
           reference_protein_id: referenceProteinId,
           items,
@@ -63,7 +70,7 @@ export function SaveRecipeDialog({
         await savedApi.updateRecipe(editing!.id, body)
         toast.success(isDraft ? `Черновик «${name.trim()}» обновлён` : `Рецептура «${name.trim()}» обновлена`)
       } else {
-        const body: any = { name: name.trim(), reference_protein_id: referenceProteinId, items, draft: isDraft }
+        const body: SaveRecipeBody = { name: name.trim(), reference_protein_id: referenceProteinId, items, draft: isDraft }
         if (groupChoice === NEW_GROUP) body.new_group_name = newGroupName.trim()
         else if (groupChoice !== NO_GROUP) body.group_id = groupChoice
         await savedApi.createRecipe(body)
@@ -71,8 +78,8 @@ export function SaveRecipeDialog({
       }
       setOpen(false)
       setNewGroupName('')
-    } catch (e: any) {
-      toast.error('Не удалось сохранить', { description: e.message })
+    } catch (e) {
+      toast.error('Не удалось сохранить', { description: e instanceof Error ? e.message : String(e) })
     } finally {
       setSaving(false)
     }

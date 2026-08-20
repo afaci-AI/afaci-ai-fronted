@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { UserPlus, MoreHorizontal, Pencil, Power, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -106,21 +106,7 @@ export default function UsersPage() {
 
   const canManage = !!currentUser && hasPermission(currentUser.role, 'canManageUsers')
 
-  useEffect(() => {
-    if (!currentUser) return
-    if (!canManage) {
-      router.push('/dashboard')
-      return
-    }
-    loadUsers()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser])
-
-  if (!currentUser || !canManage) {
-    return null
-  }
-
-  async function loadUsers() {
+  const loadUsers = useCallback(async () => {
     setIsLoadingUsers(true)
     try {
       const data = await usersApi.list()
@@ -130,6 +116,21 @@ export default function UsersPage() {
     } finally {
       setIsLoadingUsers(false)
     }
+  }, [])
+
+  useEffect(() => {
+    if (!currentUser) return
+    if (!canManage) {
+      router.push('/dashboard')
+      return
+    }
+    ;(async () => {
+      await loadUsers()
+    })()
+  }, [currentUser, canManage, loadUsers, router])
+
+  if (!currentUser || !canManage) {
+    return null
   }
 
   const filteredUsers = users.filter((user) => {

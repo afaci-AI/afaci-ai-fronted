@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Loader2, TrendingDown } from 'lucide-react'
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import type { Row } from '../_hooks/useCalculator'
 import type { OptConstraints } from '../api'
+import type { CalcProduct } from '@/modules/products/api'
 
 interface BoundRow { key: number; min: string; max: string }
 
@@ -22,7 +23,7 @@ export function OptimizeCostDialog({
   onOptimize,
 }: {
   rows: Row[]
-  products: any[]
+  products: CalcProduct[]
   canOptimize: boolean
   optimizing: boolean
   onOptimize: (constraints: OptConstraints, bounds: BoundRow[]) => void
@@ -34,15 +35,18 @@ export function OptimizeCostDialog({
 
   const eligibleRows = rows.filter((r) => r.product_id && r.price !== '')
 
-  useEffect(() => {
+  // Сброс границ при открытии: синхронное обновление состояния во время рендера.
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (open !== prevOpen) {
+    setPrevOpen(open)
     if (open) {
       setBounds(eligibleRows.map((r) => ({ key: r.key, min: '', max: '' })))
     }
-  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+  }
 
   const productName = (product_id: string) => {
     const p = products.find((p) => p.product_id === product_id)
-    return p?.product_name ?? p?.name ?? product_id
+    return p?.product_name ?? product_id
   }
 
   const patchBound = (key: number, patch: Partial<BoundRow>) =>

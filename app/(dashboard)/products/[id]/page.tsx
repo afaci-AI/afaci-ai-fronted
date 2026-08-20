@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, useCallback, use } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { toast } from 'sonner'
@@ -8,7 +8,6 @@ import { Pencil, Plus, FlaskConical, Package, MapPin, FolderTree, Trash2 } from 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Input } from '@/components/ui/input'
@@ -45,9 +44,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [formData, setFormData] = useState({ nutrient_name_id: '', unit_id: '', quantity: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  useEffect(() => { loadData() }, [id])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setError(null)
       const [prod, nuts, cats, regs, names, types, uns] = await Promise.all([
@@ -71,7 +68,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
+
+  useEffect(() => {
+    ;(async () => {
+      await loadData()
+    })()
+  }, [loadData])
 
   const category = categories.find(c => c.id === product?.category_id)
   const region = regions.find(r => r.id === product?.region_id)

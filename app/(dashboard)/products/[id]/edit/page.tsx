@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -44,11 +44,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [regions, setRegions] = useState<Region[]>([])
   const [subcategories, setSubcategories] = useState<Subcategory[]>([])
 
-  useEffect(() => {
-    loadData()
-  }, [id])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [prods, cats, regs, subcats] = await Promise.all([
         productsApi.list(),
@@ -73,12 +69,18 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         router.push('/products')
         return
       }
-    } catch (e) {
+    } catch {
       toast.error('Ошибка загрузки')
     } finally {
       setInitialLoading(false)
     }
-  }
+  }, [id, router])
+
+  useEffect(() => {
+    ;(async () => {
+      await loadData()
+    })()
+  }, [loadData])
 
   const availableSubcategories = formData.category_id
     ? subcategories.filter(s => s.category_id === formData.category_id)
@@ -119,7 +121,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       })
       toast.success('Продукт обновлён')
       router.push(`/products/${id}`)
-    } catch (error) {
+    } catch {
       toast.error('Не удалось обновить продукт')
     } finally {
       setIsSubmitting(false)

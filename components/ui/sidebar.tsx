@@ -74,7 +74,10 @@ function SidebarProvider({
   const [_open, _setOpen] = React.useState(defaultOpen)
   const open = openProp ?? _open
   const openRef = React.useRef(open)
-  openRef.current = open
+
+  React.useEffect(() => {
+    openRef.current = open
+  }, [open])
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === 'function' ? value(openRef.current) : value
@@ -608,10 +611,13 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<'div'> & {
   showIcon?: boolean
 }) {
-  // Random width between 50 to 90%.
+  // Deterministic pseudo-random width between 50 to 90% (stable per instance).
+  const seed = React.useId()
   const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
-  }, [])
+    let hash = 0
+    for (const ch of seed) hash = (hash * 31 + ch.charCodeAt(0)) % 997
+    return `${(hash % 40) + 50}%`
+  }, [seed])
 
   return (
     <div

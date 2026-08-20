@@ -231,7 +231,6 @@ function FieldError({
 }
 
 function FieldMessage({
-  variant,
   ...props
 }: React.ComponentProps<typeof FieldError> & {
   variant?: 'error'

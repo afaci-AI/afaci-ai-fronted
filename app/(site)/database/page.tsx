@@ -21,6 +21,24 @@ import type { Category, Subcategory, Product, Region } from '@/lib/types'
 const ALL = 'all'
 const FILTERS_KEY = 'database-filters'
 
+const readStoredFilters = (): { query: string; category: string; subcategory: string; region: string } | null => {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = sessionStorage.getItem(FILTERS_KEY)
+    if (!raw) return null
+    const f = JSON.parse(raw)
+    return {
+      query: f.query ?? '',
+      category: f.category ?? ALL,
+      subcategory: f.subcategory ?? ALL,
+      region: f.region ?? ALL,
+    }
+  } catch {
+    // ignore malformed storage
+    return null
+  }
+}
+
 export default function DatabasePage() {
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -29,34 +47,15 @@ export default function DatabasePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [query, setQuery] = useState('')
-  const [category, setCategory] = useState<string>(ALL)
-  const [subcategory, setSubcategory] = useState<string>(ALL)
-  const [region, setRegion] = useState<string>(ALL)
-  const [restored, setRestored] = useState(false)
+  const [query, setQuery] = useState(() => readStoredFilters()?.query ?? '')
+  const [category, setCategory] = useState<string>(() => readStoredFilters()?.category ?? ALL)
+  const [subcategory, setSubcategory] = useState<string>(() => readStoredFilters()?.subcategory ?? ALL)
+  const [region, setRegion] = useState<string>(() => readStoredFilters()?.region ?? ALL)
 
-  // Restore saved filters/search once on mount (after hydration, to avoid mismatch).
+  // Persist filters/search whenever they change.
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(FILTERS_KEY)
-      if (raw) {
-        const f = JSON.parse(raw)
-        setQuery(f.query ?? '')
-        setCategory(f.category ?? ALL)
-        setSubcategory(f.subcategory ?? ALL)
-        setRegion(f.region ?? ALL)
-      }
-    } catch {
-      // ignore malformed storage
-    }
-    setRestored(true)
-  }, [])
-
-  // Persist filters/search whenever they change (skip until restore has run).
-  useEffect(() => {
-    if (!restored) return
     sessionStorage.setItem(FILTERS_KEY, JSON.stringify({ query, category, subcategory, region }))
-  }, [restored, query, category, subcategory, region])
+  }, [query, category, subcategory, region])
 
   useEffect(() => {
     ;(async () => {

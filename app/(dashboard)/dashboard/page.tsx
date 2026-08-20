@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Package, FolderTree, MapPin, FlaskConical, Plus, Upload, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { AppHeader } from '@/components/app-header'
 import { useAuth } from '@/lib/auth-context'
 import { hasPermission } from '@/lib/types'
+import type { Product } from '@/lib/types'
 import { productsApi, categoriesApi, regionsApi, nutrientNamesApi } from '@/lib/api'
 
 export default function DashboardPage() {
@@ -15,12 +16,10 @@ export default function DashboardPage() {
   const canEdit = user && hasPermission(user.role, 'canEditProducts')
 
   const [stats, setStats] = useState({ products: 0, categories: 0, regions: 0, nutrients: 0 })
-  const [recentProducts, setRecentProducts] = useState<any[]>([])
+  const [recentProducts, setRecentProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { loadData() }, [])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [prods, cats, regs, nuts] = await Promise.all([
         productsApi.list(),
@@ -35,7 +34,13 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      await loadData()
+    })()
+  }, [loadData])
 
   const statsCards = [
     { title: 'Продукты', value: stats.products, icon: Package, href: '/products', color: 'bg-primary/10 text-primary' },

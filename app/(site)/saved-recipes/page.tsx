@@ -21,6 +21,7 @@ import { DeleteDialog } from '@/components/delete-dialog'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { savedApi } from '@/lib/api'
+import type { SavedRecipe, SavedGroup } from '@/modules/saved/api'
 import { useAuth } from '@/lib/auth-context'
 
 const ALL = '__all__'
@@ -35,14 +36,14 @@ export default function SavedRecipesPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
 
-  const [groups, setGroups] = useState<any[]>([])
-  const [recipes, setRecipes] = useState<any[]>([])
+  const [groups, setGroups] = useState<SavedGroup[]>([])
+  const [recipes, setRecipes] = useState<SavedRecipe[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<string>(ALL)
 
-  const [renameTarget, setRenameTarget] = useState<any | null>(null)
+  const [renameTarget, setRenameTarget] = useState<SavedRecipe | null>(null)
   const [renameValue, setRenameValue] = useState('')
-  const [deleteTarget, setDeleteTarget] = useState<any | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<SavedRecipe | null>(null)
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.replace('/login?next=/saved-recipes')
@@ -53,15 +54,18 @@ export default function SavedRecipesPage() {
       const [gs, rs] = await Promise.all([savedApi.groups(), savedApi.recipes()])
       setGroups(gs)
       setRecipes(rs)
-    } catch (e: any) {
-      toast.error('Не удалось загрузить рецептуры', { description: e.message })
+    } catch (e) {
+      toast.error('Не удалось загрузить рецептуры', { description: e instanceof Error ? e.message : String(e) })
     } finally {
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    if (isAuthenticated) load()
+    if (!isAuthenticated) return
+    ;(async () => {
+      await load()
+    })()
   }, [isAuthenticated, load])
 
   const groupName = useCallback(
@@ -82,13 +86,13 @@ export default function SavedRecipesPage() {
     await load()
   }
 
-  const moveRecipe = async (recipe: any, groupId: string) => {
+  const moveRecipe = async (recipe: SavedRecipe, groupId: string) => {
     try {
       await savedApi.updateRecipe(recipe.id, { group_id: groupId === NONE ? null : groupId })
       toast.success('Рецептура перемещена')
       await load()
-    } catch (e: any) {
-      toast.error('Не удалось переместить', { description: e.message })
+    } catch (e) {
+      toast.error('Не удалось переместить', { description: e instanceof Error ? e.message : String(e) })
     }
   }
 
@@ -99,8 +103,8 @@ export default function SavedRecipesPage() {
       toast.success('Переименовано')
       setRenameTarget(null)
       await load()
-    } catch (e: any) {
-      toast.error('Не удалось переименовать', { description: e.message })
+    } catch (e) {
+      toast.error('Не удалось переименовать', { description: e instanceof Error ? e.message : String(e) })
     }
   }
 
@@ -312,8 +316,8 @@ function CreateGroupDialog({ onCreate }: { onCreate: (name: string) => Promise<v
       toast.success('Группа создана')
       setName('')
       setOpen(false)
-    } catch (e: any) {
-      toast.error('Не удалось создать группу', { description: e.message })
+    } catch (e) {
+      toast.error('Не удалось создать группу', { description: e instanceof Error ? e.message : String(e) })
     } finally {
       setSaving(false)
     }
