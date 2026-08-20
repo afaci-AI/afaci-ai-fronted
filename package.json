@@ -60,7 +60,14 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@emnapi/core": "^1.7.1",
+    "@emnapi/runtime": "^1.7.1",
+    "@emnapi/wasi-threads": "^1.1.0",
+    "@napi-rs/wasm-runtime": "^1.1.1",
     "@tailwindcss/postcss": "^4.2.0",
+    "@tybys/wasm-util": "^0.10.3",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.4",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
