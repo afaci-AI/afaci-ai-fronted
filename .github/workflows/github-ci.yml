@@ -78,7 +78,7 @@ jobs:
         env:
           DOCKER_HOST: ${{ secrets.DOCKER_HOST }}
           BACKEND_IMAGE: ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.IMAGE_NAME }}:${{ github.sha }}
-          BACKEND_PORT: ${{ secrets.BACKEND_PORT || '8000' }}
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
         run: |
           pwd
           ls -la
