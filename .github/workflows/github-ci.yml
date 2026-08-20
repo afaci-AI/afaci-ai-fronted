@@ -30,8 +30,7 @@ jobs:
   build:
     name: build
     runs-on: afaci-runner-01
-    #needs:
-    #  - frontend-analysis
+    needs: frontend-analysis
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
