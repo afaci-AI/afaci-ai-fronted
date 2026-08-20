@@ -23,11 +23,6 @@ jobs:
           node-version: "20"
           cache: 'npm'
           cache-dependency-path: './package-lock.json'
-          
-      - name: Update package-lock.json if out of sync
-        run: |
-          npm install
-          git diff --exit-code package-lock.json || (echo "package-lock.json was out of sync and has been updated"; exit 1)
   
       - run: npm ci
       - run: npx eslint .
