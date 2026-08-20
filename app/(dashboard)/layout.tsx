@@ -27,9 +27,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="flex flex-col">
-        {children}
-      </SidebarInset>
+      <SidebarInset className="flex flex-col">{children}</SidebarInset>
     </SidebarProvider>
   )
 }

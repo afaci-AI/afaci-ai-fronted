@@ -36,11 +36,12 @@ const roleLabels: Record<UserRole, string> = {
   viewer: 'Аналитик',
 }
 
-const roleBadgeVariants: Record<UserRole, 'default' | 'secondary' | 'outline'> = {
-  admin: 'default',
-  editor: 'secondary',
-  viewer: 'outline',
-}
+const roleBadgeVariants: Record<UserRole, 'default' | 'secondary' | 'outline'> =
+  {
+    admin: 'default',
+    editor: 'secondary',
+    viewer: 'outline',
+  }
 
 export function AppHeader({ breadcrumbs }: AppHeaderProps) {
   const { user, logout } = useAuth()
@@ -55,7 +56,7 @@ export function AppHeader({ breadcrumbs }: AppHeaderProps) {
     <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b border-border bg-card px-4">
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="h-6" />
-      
+
       {breadcrumbs && breadcrumbs.length > 0 && (
         <Breadcrumb>
           <BreadcrumbList>
@@ -64,7 +65,9 @@ export function AppHeader({ breadcrumbs }: AppHeaderProps) {
                 {index > 0 && <BreadcrumbSeparator />}
                 <BreadcrumbItem>
                   {crumb.href ? (
-                    <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                    <BreadcrumbLink href={crumb.href}>
+                      {crumb.label}
+                    </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                   )}
@@ -85,7 +88,10 @@ export function AppHeader({ breadcrumbs }: AppHeaderProps) {
                 </div>
                 <div className="hidden flex-col items-start text-left md:flex">
                   <span className="text-sm font-medium">{user.name}</span>
-                  <Badge variant={roleBadgeVariants[user.role]} className="text-xs">
+                  <Badge
+                    variant={roleBadgeVariants[user.role]}
+                    className="text-xs"
+                  >
                     {roleLabels[user.role]}
                   </Badge>
                 </div>
@@ -100,7 +106,10 @@ export function AppHeader({ breadcrumbs }: AppHeaderProps) {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-destructive"
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Выйти
               </DropdownMenuItem>

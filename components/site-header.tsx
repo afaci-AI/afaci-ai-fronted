@@ -3,7 +3,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Database, Menu, LogOut, LayoutDashboard, User, ChevronDown } from 'lucide-react'
+import {
+  Database,
+  Menu,
+  LogOut,
+  LayoutDashboard,
+  User,
+  ChevronDown,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -56,7 +63,9 @@ export function SiteHeader() {
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuth()
   const [open, setOpen] = useState(false)
-  const navItems = isAuthenticated ? [...baseNavItems, ...authNavItems] : baseNavItems
+  const navItems = isAuthenticated
+    ? [...baseNavItems, ...authNavItems]
+    : baseNavItems
 
   const handleLogout = () => {
     logout()
@@ -100,7 +109,10 @@ export function SiteHeader() {
           {isAuthenticated && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2 px-2">
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 px-2"
+                >
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
                       {initials(user.name)}
@@ -116,7 +128,9 @@ export function SiteHeader() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col gap-1">
                     <p className="text-sm font-medium">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {user.email}
+                    </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -127,7 +141,10 @@ export function SiteHeader() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-destructive"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Выйти
                 </DropdownMenuItem>
@@ -142,7 +159,12 @@ export function SiteHeader() {
           {/* Mobile menu trigger */}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Меню">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                aria-label="Меню"
+              >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -184,11 +206,19 @@ export function SiteHeader() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{user.name}</p>
-                        <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                        <p className="truncate text-sm font-medium">
+                          {user.name}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {user.email}
+                        </p>
                       </div>
                     </div>
-                    <Button asChild variant="outline" className="w-full justify-start">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full justify-start"
+                    >
                       <Link href="/dashboard" onClick={() => setOpen(false)}>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         Админ-панель

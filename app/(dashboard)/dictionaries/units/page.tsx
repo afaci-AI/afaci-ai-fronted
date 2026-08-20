@@ -1,12 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Plus } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AppHeader } from '@/components/app-header'
 import { DataTable, type Column } from '@/components/data-table'
-import { DictionaryFormDrawer, type FormField } from '@/components/dictionary-form-drawer'
+import {
+  DictionaryFormDrawer,
+  type FormField,
+} from '@/components/dictionary-form-drawer'
 import { DeleteDialog } from '@/components/delete-dialog'
 import { useAuth } from '@/lib/auth-context'
 import { hasPermission } from '@/lib/types'
@@ -25,11 +34,7 @@ export default function UnitsPage() {
   const [selectedItem, setSelectedItem] = useState<Unit | null>(null)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setError(null)
       const data = await unitsApi.list()
@@ -39,11 +44,17 @@ export default function UnitsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      await loadData()
+    })()
+  }, [loadData])
 
   const columns: Column<Unit>[] = [
     { key: 'name', label: 'Название', sortable: true },
-    { key: 'id', label: 'ID', width: 'text-xs text-muted-foreground' },
+    { key: 'id', label: 'ID', className: 'text-xs text-muted-foreground' },
   ]
 
   const formFields: FormField[] = [
@@ -119,7 +130,12 @@ export default function UnitsPage() {
               </CardDescription>
             </div>
             {canEdit && (
-              <Button onClick={() => { setSelectedItem(null); setDrawerOpen(true); }}>
+              <Button
+                onClick={() => {
+                  setSelectedItem(null)
+                  setDrawerOpen(true)
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить
               </Button>
@@ -139,7 +155,7 @@ export default function UnitsPage() {
               onEdit={canEdit ? handleEdit : undefined}
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет единиц измерения"
               emptyDescription="Добавьте первую единицу"
             />
@@ -149,7 +165,11 @@ export default function UnitsPage() {
         <DictionaryFormDrawer
           open={drawerOpen}
           onOpenChange={setDrawerOpen}
-          title={selectedItem ? 'Редактировать единицу' : 'Добавить единицу измерения'}
+          title={
+            selectedItem
+              ? 'Редактировать единицу'
+              : 'Добавить единицу измерения'
+          }
           description="Заполните информацию о единице"
           fields={formFields}
           data={selectedItem}
@@ -162,7 +182,6 @@ export default function UnitsPage() {
           onOpenChange={setDeleteOpen}
           title={`Удалить единицу "${selectedItem?.name}"?`}
           onConfirm={handleConfirmDelete}
-          loading={saving}
         />
       </main>
     </>

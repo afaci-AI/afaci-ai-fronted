@@ -1,10 +1,16 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -14,10 +20,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { FieldGroup, Field, FieldLabel, FieldMessage } from '@/components/ui/field'
+import {
+  FieldGroup,
+  Field,
+  FieldLabel,
+  FieldMessage,
+} from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 import { AppHeader } from '@/components/app-header'
-import { productsApi, categoriesApi, regionsApi, subcategoriesApi } from '@/lib/api'
+import {
+  productsApi,
+  categoriesApi,
+  regionsApi,
+  subcategoriesApi,
+} from '@/lib/api'
 import type { Product, Category, Region, Subcategory } from '@/lib/types'
 
 interface FormData {
@@ -27,12 +43,18 @@ interface FormData {
   region_id: string
 }
 
-export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+export default function EditProductPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const { id } = use(params)
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
-  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>(
+    {},
+  )
   const [formData, setFormData] = useState<FormData>({
     name: '',
     category_id: '',
@@ -44,17 +66,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [regions, setRegions] = useState<Region[]>([])
   const [subcategories, setSubcategories] = useState<Subcategory[]>([])
 
-  useEffect(() => {
-    loadData()
-  }, [id])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [prods, cats, regs, subcats] = await Promise.all([
         productsApi.list(),
         categoriesApi.list(),
         regionsApi.list(),
-        subcategoriesApi.list()
+        subcategoriesApi.list(),
       ])
       setCategories(cats)
       setRegions(regs)
@@ -73,15 +91,21 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         router.push('/products')
         return
       }
-    } catch (e) {
+    } catch {
       toast.error('Ошибка загрузки')
     } finally {
       setInitialLoading(false)
     }
-  }
+  }, [id, router])
+
+  useEffect(() => {
+    ;(async () => {
+      await loadData()
+    })()
+  }, [loadData])
 
   const availableSubcategories = formData.category_id
-    ? subcategories.filter(s => s.category_id === formData.category_id)
+    ? subcategories.filter((s) => s.category_id === formData.category_id)
     : []
 
   const handleChange = (field: keyof FormData, value: string) => {
@@ -119,7 +143,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       })
       toast.success('Продукт обновлён')
       router.push(`/products/${id}`)
-    } catch (error) {
+    } catch {
       toast.error('Не удалось обновить продукт')
     } finally {
       setIsSubmitting(false)
@@ -158,42 +182,94 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               <form onSubmit={handleSubmit} className="space-y-6">
                 <FieldGroup>
                   <Field>
-                    <FieldLabel htmlFor="name">Название <span className="text-destructive">*</span></FieldLabel>
-                    <Input id="name" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} aria-invalid={!!errors.name} />
-                    {errors.name && <FieldMessage variant="error">{errors.name}</FieldMessage>}
+                    <FieldLabel htmlFor="name">
+                      Название <span className="text-destructive">*</span>
+                    </FieldLabel>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => handleChange('name', e.target.value)}
+                      aria-invalid={!!errors.name}
+                    />
+                    {errors.name && (
+                      <FieldMessage variant="error">{errors.name}</FieldMessage>
+                    )}
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="category_id">Категория <span className="text-destructive">*</span></FieldLabel>
-                    <Select value={formData.category_id} onValueChange={(v) => handleChange('category_id', v)}>
-                      <SelectTrigger aria-invalid={!!errors.category_id}><SelectValue placeholder="Выберите категорию" /></SelectTrigger>
+                    <FieldLabel htmlFor="category_id">
+                      Категория <span className="text-destructive">*</span>
+                    </FieldLabel>
+                    <Select
+                      value={formData.category_id}
+                      onValueChange={(v) => handleChange('category_id', v)}
+                    >
+                      <SelectTrigger aria-invalid={!!errors.category_id}>
+                        <SelectValue placeholder="Выберите категорию" />
+                      </SelectTrigger>
                       <SelectContent>
-                        {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                        {categories.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
-                    {errors.category_id && <FieldMessage variant="error">{errors.category_id}</FieldMessage>}
+                    {errors.category_id && (
+                      <FieldMessage variant="error">
+                        {errors.category_id}
+                      </FieldMessage>
+                    )}
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="subcategory_id">Подкатегория</FieldLabel>
-                    <Select value={formData.subcategory_id} onValueChange={(v) => handleChange('subcategory_id', v)} disabled={!formData.category_id || availableSubcategories.length === 0}>
-                      <SelectTrigger><SelectValue placeholder="Выберите подкатегорию" /></SelectTrigger>
+                    <FieldLabel htmlFor="subcategory_id">
+                      Подкатегория
+                    </FieldLabel>
+                    <Select
+                      value={formData.subcategory_id}
+                      onValueChange={(v) => handleChange('subcategory_id', v)}
+                      disabled={
+                        !formData.category_id ||
+                        availableSubcategories.length === 0
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите подкатегорию" />
+                      </SelectTrigger>
                       <SelectContent>
-                        {availableSubcategories.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                        {availableSubcategories.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="region_id">Регион</FieldLabel>
-                    <Select value={formData.region_id} onValueChange={(v) => handleChange('region_id', v)}>
-                      <SelectTrigger><SelectValue placeholder="Выберите регион" /></SelectTrigger>
+                    <Select
+                      value={formData.region_id}
+                      onValueChange={(v) => handleChange('region_id', v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите регион" />
+                      </SelectTrigger>
                       <SelectContent>
-                        {regions.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
+                        {regions.map((r) => (
+                          <SelectItem key={r.id} value={r.id}>
+                            {r.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </Field>
                 </FieldGroup>
                 <div className="flex justify-end gap-3">
-                  <Button type="button" variant="outline" asChild><Link href={`/products/${id}`}>Отмена</Link></Button>
-                  <Button type="submit" disabled={isSubmitting}>{isSubmitting && <Spinner className="mr-2" />}Сохранить</Button>
+                  <Button type="button" variant="outline" asChild>
+                    <Link href={`/products/${id}`}>Отмена</Link>
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting && <Spinner className="mr-2" />}Сохранить
+                  </Button>
                 </div>
               </form>
             </CardContent>

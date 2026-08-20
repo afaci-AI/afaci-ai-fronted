@@ -4,11 +4,21 @@ import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/auth-context'
-import { calculatorApi, OptConstraints } from '../api'
-import { savedApi } from '@/modules/saved/api'
-import { tableApi } from '@/modules/products/api'
+import {
+  calculatorApi,
+  type OptConstraints,
+  type ReferenceProtein,
+  type ComputeResult,
+} from '../api'
+import { savedApi, type SavedRecipeDetail } from '@/modules/saved/api'
+import { tableApi, type CalcProduct } from '@/modules/products/api'
 
-export interface Row { key: number; product_id: string; amount: string; price: string }
+export interface Row {
+  key: number
+  product_id: string
+  amount: string
+  price: string
+}
 
 const REQUIRED_SUM = 100
 let rowSeq = 1
@@ -16,17 +26,23 @@ let rowSeq = 1
 export function useCalculator() {
   const { isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
-  const [references, setReferences] = useState<any[]>([])
+  const [references, setReferences] = useState<ReferenceProtein[]>([])
   const [refId, setRefId] = useState<string>('')
-  const [products, setProducts] = useState<any[]>([])
-  const [recipes, setRecipes] = useState<any[]>([])
-  const [rows, setRows] = useState<Row[]>([{ key: rowSeq++, product_id: '', amount: '', price: '' }])
+  const [products, setProducts] = useState<CalcProduct[]>([])
+  const [recipes, setRecipes] = useState<SavedRecipeDetail[]>([])
+  const [rows, setRows] = useState<Row[]>([
+    { key: rowSeq++, product_id: '', amount: '', price: '' },
+  ])
   const [costEnabled, setCostEnabled] = useState(false)
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<ComputeResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [computing, setComputing] = useState(false)
   const [optimizing, setOptimizing] = useState(false)
-  const [editing, setEditing] = useState<{ id: string; name: string; group_id: string | null } | null>(null)
+  const [editing, setEditing] = useState<{
+    id: string
+    name: string
+    group_id: string | null
+  } | null>(null)
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -45,7 +61,7 @@ export function useCalculator() {
         setReferences(refs)
         setProducts(prods)
         setRecipes(recs)
-        const def = refs.find((r: any) => r.is_default) ?? refs[0]
+        const def = refs.find((r) => r.is_default) ?? refs[0]
 
         const params = new URLSearchParams(window.location.search)
         const editId = params.get('edit')
@@ -54,14 +70,19 @@ export function useCalculator() {
         if (targetId) {
           try {
             const rec = await savedApi.recipe(targetId)
-            const hasPrice = rec.items.some((it: any) => it.price_per_kg != null)
+            const hasPrice = rec.items.some((it) => it.price_per_kg != null)
             if (hasPrice) setCostEnabled(true)
-            setRows(rec.items.map((it: any) => ({
-              key: rowSeq++, product_id: it.product_id, amount: String(it.amount_g),
-              price: it.price_per_kg != null ? String(it.price_per_kg) : '',
-            })))
+            setRows(
+              rec.items.map((it) => ({
+                key: rowSeq++,
+                product_id: it.product_id,
+                amount: String(it.amount_g),
+                price: it.price_per_kg != null ? String(it.price_per_kg) : '',
+              })),
+            )
             setRefId(rec.reference_protein_id || def?.id || '')
-            if (editId) setEditing({ id: rec.id, name: rec.name, group_id: rec.group_id })
+            if (editId)
+              setEditing({ id: rec.id, name: rec.name, group_id: rec.group_id })
             else toast.success(`Загружена рецептура: ${rec.name}`)
           } catch {
             if (def) setRefId(def.id)
@@ -69,8 +90,10 @@ export function useCalculator() {
         } else if (def) {
           setRefId(def.id)
         }
-      } catch (e: any) {
-        toast.error('Не удалось загрузить данные', { description: e.message })
+      } catch (e) {
+        toast.error('Не удалось загрузить данные', {
+          description: e instanceof Error ? e.message : String(e),
+        })
       } finally {
         setLoading(false)
       }
@@ -79,10 +102,15 @@ export function useCalculator() {
 
   const selectedRef = references.find((r) => r.id === refId)
   const sum = useMemo(
-    () => rows.reduce((s, r) => s + (parseFloat(r.amount.replace(',', '.')) || 0), 0),
+    () =>
+      rows.reduce(
+        (s, r) => s + (parseFloat(r.amount.replace(',', '.')) || 0),
+        0,
+      ),
     [rows],
   )
-  const allSelected = rows.length > 0 && rows.every((r) => r.product_id && r.amount !== '')
+  const allSelected =
+    rows.length > 0 && rows.every((r) => r.product_id && r.amount !== '')
   const sumValid = Math.abs(sum - REQUIRED_SUM) < 0.01
   const canCompute = allSelected && sumValid && !!refId
   const canOptimize =
@@ -92,7 +120,11 @@ export function useCalculator() {
     !!refId
   const usedIds = rows.map((r) => r.product_id).filter(Boolean)
 
-  const addRow = () => setRows((rs) => [...rs, { key: rowSeq++, product_id: '', amount: '', price: '' }])
+  const addRow = () =>
+    setRows((rs) => [
+      ...rs,
+      { key: rowSeq++, product_id: '', amount: '', price: '' },
+    ])
   const removeRow = (key: number) =>
     setRows((rs) => (rs.length > 1 ? rs.filter((r) => r.key !== key) : rs))
   const patchRow = (key: number, patch: Partial<Row>) =>
@@ -112,9 +144,14 @@ export function useCalculator() {
   const loadExample = () => {
     const rec = recipes[0]
     if (!rec) return
-    setRows(rec.items.map((it: any) => ({
-      key: rowSeq++, product_id: it.product_id, amount: String(it.amount_g), price: '',
-    })))
+    setRows(
+      rec.items.map((it) => ({
+        key: rowSeq++,
+        product_id: it.product_id,
+        amount: String(it.amount_g),
+        price: '',
+      })),
+    )
     const def = references.find((r) => r.is_default) ?? references[0]
     if (def) setRefId(def.id)
     setResult(null)
@@ -137,9 +174,17 @@ export function useCalculator() {
         })),
       })
       setResult(res)
-      setTimeout(() => document.getElementById('calc-results')?.scrollIntoView({ behavior: 'smooth' }), 50)
-    } catch (e: any) {
-      toast.error('Расчёт не выполнен', { description: e.message })
+      setTimeout(
+        () =>
+          document
+            .getElementById('calc-results')
+            ?.scrollIntoView({ behavior: 'smooth' }),
+        50,
+      )
+    } catch (e) {
+      toast.error('Расчёт не выполнен', {
+        description: e instanceof Error ? e.message : String(e),
+      })
     } finally {
       setComputing(false)
     }
@@ -168,7 +213,7 @@ export function useCalculator() {
       })
 
       const amountMap = new Map<string, number>(
-        res.optimal_items.map((it: any) => [it.product_id, it.amount_g]),
+        res.optimal_items.map((it) => [it.product_id, it.amount_g]),
       )
       setRows((rs) =>
         rs.map((r) =>
@@ -179,12 +224,19 @@ export function useCalculator() {
       )
       setResult(res.report)
       setTimeout(
-        () => document.getElementById('calc-results')?.scrollIntoView({ behavior: 'smooth' }),
+        () =>
+          document
+            .getElementById('calc-results')
+            ?.scrollIntoView({ behavior: 'smooth' }),
         50,
       )
-      toast.success(`Оптимальная стоимость: ${res.total_cost_per_100g.toFixed(2)} сом / 100 г`)
-    } catch (e: any) {
-      toast.error('Оптимизация не выполнена', { description: e.message })
+      toast.success(
+        `Оптимальная стоимость: ${res.total_cost_per_100g.toFixed(2)} сом / 100 г`,
+      )
+    } catch (e) {
+      toast.error('Оптимизация не выполнена', {
+        description: e instanceof Error ? e.message : String(e),
+      })
     } finally {
       setOptimizing(false)
     }

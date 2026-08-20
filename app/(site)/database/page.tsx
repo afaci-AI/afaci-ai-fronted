@@ -2,7 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Search, Package, MapPin, FolderTree, Layers, AlertCircle, X } from 'lucide-react'
+import {
+  Search,
+  Package,
+  MapPin,
+  FolderTree,
+  Layers,
+  AlertCircle,
+  X,
+} from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,11 +23,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { productsApi, categoriesApi, subcategoriesApi, regionsApi } from '@/lib/api'
+import {
+  productsApi,
+  categoriesApi,
+  subcategoriesApi,
+  regionsApi,
+} from '@/lib/api'
 import type { Category, Subcategory, Product, Region } from '@/lib/types'
 
 const ALL = 'all'
 const FILTERS_KEY = 'database-filters'
+
+const readStoredFilters = (): {
+  query: string
+  category: string
+  subcategory: string
+  region: string
+} | null => {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = sessionStorage.getItem(FILTERS_KEY)
+    if (!raw) return null
+    const f = JSON.parse(raw)
+    return {
+      query: f.query ?? '',
+      category: f.category ?? ALL,
+      subcategory: f.subcategory ?? ALL,
+      region: f.region ?? ALL,
+    }
+  } catch {
+    // ignore malformed storage
+    return null
+  }
+}
 
 export default function DatabasePage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -29,34 +65,24 @@ export default function DatabasePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [query, setQuery] = useState('')
-  const [category, setCategory] = useState<string>(ALL)
-  const [subcategory, setSubcategory] = useState<string>(ALL)
-  const [region, setRegion] = useState<string>(ALL)
-  const [restored, setRestored] = useState(false)
+  const [query, setQuery] = useState(() => readStoredFilters()?.query ?? '')
+  const [category, setCategory] = useState<string>(
+    () => readStoredFilters()?.category ?? ALL,
+  )
+  const [subcategory, setSubcategory] = useState<string>(
+    () => readStoredFilters()?.subcategory ?? ALL,
+  )
+  const [region, setRegion] = useState<string>(
+    () => readStoredFilters()?.region ?? ALL,
+  )
 
-  // Restore saved filters/search once on mount (after hydration, to avoid mismatch).
+  // Persist filters/search whenever they change.
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(FILTERS_KEY)
-      if (raw) {
-        const f = JSON.parse(raw)
-        setQuery(f.query ?? '')
-        setCategory(f.category ?? ALL)
-        setSubcategory(f.subcategory ?? ALL)
-        setRegion(f.region ?? ALL)
-      }
-    } catch {
-      // ignore malformed storage
-    }
-    setRestored(true)
-  }, [])
-
-  // Persist filters/search whenever they change (skip until restore has run).
-  useEffect(() => {
-    if (!restored) return
-    sessionStorage.setItem(FILTERS_KEY, JSON.stringify({ query, category, subcategory, region }))
-  }, [restored, query, category, subcategory, region])
+    sessionStorage.setItem(
+      FILTERS_KEY,
+      JSON.stringify({ query, category, subcategory, region }),
+    )
+  }, [query, category, subcategory, region])
 
   useEffect(() => {
     ;(async () => {
@@ -80,12 +106,16 @@ export default function DatabasePage() {
   }, [])
 
   const categoryName = (id: string) => categories.find((c) => c.id === id)?.name
-  const subcategoryName = (id?: string) => subcategories.find((s) => s.id === id)?.name
+  const subcategoryName = (id?: string) =>
+    subcategories.find((s) => s.id === id)?.name
   const regionName = (id: string) => regions.find((r) => r.id === id)?.name
 
   // Subcategory options depend on the selected category.
   const subcategoryOptions = useMemo(
-    () => (category === ALL ? subcategories : subcategories.filter((s) => s.category_id === category)),
+    () =>
+      category === ALL
+        ? subcategories
+        : subcategories.filter((s) => s.category_id === category),
     [subcategories, category],
   )
 
@@ -94,7 +124,8 @@ export default function DatabasePage() {
     setSubcategory(ALL)
   }
 
-  const hasActiveFilters = query !== '' || category !== ALL || subcategory !== ALL || region !== ALL
+  const hasActiveFilters =
+    query !== '' || category !== ALL || subcategory !== ALL || region !== ALL
 
   const resetFilters = () => {
     setQuery('')
@@ -107,16 +138,21 @@ export default function DatabasePage() {
     return products.filter((p) => {
       const matchesQuery = p.name?.toLowerCase().includes(query.toLowerCase())
       const matchesCategory = category === ALL || p.category_id === category
-      const matchesSubcategory = subcategory === ALL || p.subcategory_id === subcategory
+      const matchesSubcategory =
+        subcategory === ALL || p.subcategory_id === subcategory
       const matchesRegion = region === ALL || p.region_id === region
-      return matchesQuery && matchesCategory && matchesSubcategory && matchesRegion
+      return (
+        matchesQuery && matchesCategory && matchesSubcategory && matchesRegion
+      )
     })
   }, [products, query, category, subcategory, region])
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">База данных</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          База данных
+        </h1>
         <p className="mt-2 text-muted-foreground">
           Продукты питания и их нутриентный состав по регионам Кыргызстана
         </p>
@@ -141,18 +177,26 @@ export default function DatabasePage() {
             <SelectContent>
               <SelectItem value={ALL}>Все категории</SelectItem>
               {categories.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select value={subcategory} onValueChange={setSubcategory} disabled={subcategoryOptions.length === 0}>
+          <Select
+            value={subcategory}
+            onValueChange={setSubcategory}
+            disabled={subcategoryOptions.length === 0}
+          >
             <SelectTrigger className="w-full md:w-44">
               <SelectValue placeholder="Подкатегория" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Все подкатегории</SelectItem>
               {subcategoryOptions.map((s) => (
-                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -163,7 +207,9 @@ export default function DatabasePage() {
             <SelectContent>
               <SelectItem value={ALL}>Все регионы</SelectItem>
               {regions.map((r) => (
-                <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                <SelectItem key={r.id} value={r.id}>
+                  {r.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -187,7 +233,9 @@ export default function DatabasePage() {
       ) : error ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-24 text-center text-muted-foreground">
           <AlertCircle className="h-8 w-8" />
-          <p className="font-medium text-foreground">Не удалось загрузить данные</p>
+          <p className="font-medium text-foreground">
+            Не удалось загрузить данные
+          </p>
           <p className="text-sm">{error}</p>
         </div>
       ) : filtered.length === 0 ? (
@@ -210,7 +258,9 @@ export default function DatabasePage() {
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                         <Package className="h-5 w-5" />
                       </div>
-                      <CardTitle className="text-base leading-snug group-hover:text-primary">{p.name}</CardTitle>
+                      <CardTitle className="text-base leading-snug group-hover:text-primary">
+                        {p.name}
+                      </CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent className="flex flex-wrap gap-2">

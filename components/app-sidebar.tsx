@@ -164,7 +164,9 @@ export function AppSidebar() {
                           asChild
                           isActive={pathname === '/dictionaries/nutrient-names'}
                         >
-                          <Link href="/dictionaries/nutrient-names">Названия</Link>
+                          <Link href="/dictionaries/nutrient-names">
+                            Названия
+                          </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>

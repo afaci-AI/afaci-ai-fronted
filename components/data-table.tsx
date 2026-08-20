@@ -1,7 +1,18 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Search, X, ChevronUp, ChevronDown, ChevronsUpDown, MoreHorizontal, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  Search,
+  X,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -104,14 +115,16 @@ export function DataTable<T extends { id: string }>({
         searchKeys.some((key) => {
           const value = item[key]
           return value && String(value).toLowerCase().includes(searchLower)
-        })
+        }),
       )
     }
 
     // Apply filters
     Object.entries(activeFilters).forEach(([key, value]) => {
       if (value && value !== 'all') {
-        result = result.filter((item) => (item as Record<string, unknown>)[key] === value)
+        result = result.filter(
+          (item) => (item as Record<string, unknown>)[key] === value,
+        )
       }
     })
 
@@ -120,11 +133,11 @@ export function DataTable<T extends { id: string }>({
       result.sort((a, b) => {
         const aVal = (a as Record<string, unknown>)[sortKey]
         const bVal = (b as Record<string, unknown>)[sortKey]
-        
+
         if (aVal === bVal) return 0
         if (aVal === null || aVal === undefined) return 1
         if (bVal === null || bVal === undefined) return -1
-        
+
         const comparison = String(aVal).localeCompare(String(bVal), 'ru')
         return sortDirection === 'asc' ? comparison : -comparison
       })
@@ -135,7 +148,10 @@ export function DataTable<T extends { id: string }>({
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize))
   const safePage = Math.min(page, totalPages)
-  const pagedData = filteredData.slice((safePage - 1) * pageSize, safePage * pageSize)
+  const pagedData = filteredData.slice(
+    (safePage - 1) * pageSize,
+    safePage * pageSize,
+  )
 
   const clearFilters = () => {
     setSearch('')
@@ -143,7 +159,8 @@ export function DataTable<T extends { id: string }>({
     setPage(1)
   }
 
-  const hasActiveFilters = search || Object.values(activeFilters).some((v) => v && v !== 'all')
+  const hasActiveFilters =
+    search || Object.values(activeFilters).some((v) => v && v !== 'all')
 
   const getSortIcon = (key: string) => {
     if (sortKey !== key) return <ChevronsUpDown className="h-4 w-4" />
@@ -199,11 +216,14 @@ export function DataTable<T extends { id: string }>({
           <Input
             placeholder={searchPlaceholder}
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setPage(1)
+            }}
             className="pl-9"
           />
         </div>
-        
+
         {filters.map((filter) => (
           <Select
             key={filter.key}
@@ -254,7 +274,9 @@ export function DataTable<T extends { id: string }>({
               <Badge key={key} variant="secondary" className="gap-1">
                 {filter?.label}: {option?.label}
                 <button
-                  onClick={() => setActiveFilters((prev) => ({ ...prev, [key]: 'all' }))}
+                  onClick={() =>
+                    setActiveFilters((prev) => ({ ...prev, [key]: 'all' }))
+                  }
                   className="ml-1"
                 >
                   <X className="h-3 w-3" />
@@ -271,7 +293,10 @@ export function DataTable<T extends { id: string }>({
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={String(column.key)} className={column.className}>
+                <TableHead
+                  key={String(column.key)}
+                  className={column.className}
+                >
                   {column.sortable ? (
                     <Button
                       variant="ghost"
@@ -296,7 +321,9 @@ export function DataTable<T extends { id: string }>({
             {filteredData.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length + (canEdit && (onEdit || onDelete) ? 1 : 0)}
+                  colSpan={
+                    columns.length + (canEdit && (onEdit || onDelete) ? 1 : 0)
+                  }
                   className="h-40"
                 >
                   <Empty>
@@ -309,17 +336,28 @@ export function DataTable<T extends { id: string }>({
               pagedData.map((item) => (
                 <TableRow key={item.id}>
                   {columns.map((column) => (
-                    <TableCell key={String(column.key)} className={column.className}>
+                    <TableCell
+                      key={String(column.key)}
+                      className={column.className}
+                    >
                       {column.render
                         ? column.render(item)
-                        : String((item as Record<string, unknown>)[String(column.key)] ?? '')}
+                        : String(
+                            (item as Record<string, unknown>)[
+                              String(column.key)
+                            ] ?? '',
+                          )}
                     </TableCell>
                   ))}
                   {(onEdit || onDelete) && canEdit && (
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -372,7 +410,10 @@ export function DataTable<T extends { id: string }>({
             </Button>
 
             {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+              .filter(
+                (p) =>
+                  p === 1 || p === totalPages || Math.abs(p - safePage) <= 1,
+              )
               .reduce<(number | '...')[]>((acc, p, idx, arr) => {
                 if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push('...')
                 acc.push(p)
@@ -380,7 +421,9 @@ export function DataTable<T extends { id: string }>({
               }, [])
               .map((p, idx) =>
                 p === '...' ? (
-                  <span key={`ellipsis-${idx}`} className="px-1">…</span>
+                  <span key={`ellipsis-${idx}`} className="px-1">
+                    …
+                  </span>
                 ) : (
                   <Button
                     key={p}
@@ -391,7 +434,7 @@ export function DataTable<T extends { id: string }>({
                   >
                     {p}
                   </Button>
-                )
+                ),
               )}
 
             <Button

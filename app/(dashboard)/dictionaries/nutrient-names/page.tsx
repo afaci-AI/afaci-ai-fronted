@@ -1,13 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Plus } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { AppHeader } from '@/components/app-header'
 import { DataTable, type Column, type Filter } from '@/components/data-table'
-import { DictionaryFormDrawer, type FormField } from '@/components/dictionary-form-drawer'
+import {
+  DictionaryFormDrawer,
+  type FormField,
+} from '@/components/dictionary-form-drawer'
 import { DeleteDialog } from '@/components/delete-dialog'
 import { useAuth } from '@/lib/auth-context'
 import { hasPermission } from '@/lib/types'
@@ -27,16 +36,12 @@ export default function NutrientNamesPage() {
   const [selectedItem, setSelectedItem] = useState<NutrientName | null>(null)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setError(null)
       const [names, types] = await Promise.all([
         nutrientNamesApi.list(),
-        nutrientTypesApi.list()
+        nutrientTypesApi.list(),
       ])
       setNutrientNames(names)
       setNutrientTypes(types)
@@ -45,7 +50,13 @@ export default function NutrientNamesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      await loadData()
+    })()
+  }, [loadData])
 
   const columns: Column<NutrientName>[] = [
     { key: 'name', label: 'Название', sortable: true },
@@ -53,7 +64,7 @@ export default function NutrientNamesPage() {
       key: 'nutrient_type_id',
       label: 'Тип',
       render: (item) => {
-        const type = nutrientTypes.find(t => t.id === item.nutrient_type_id)
+        const type = nutrientTypes.find((t) => t.id === item.nutrient_type_id)
         return type ? <Badge variant="secondary">{type.name}</Badge> : '—'
       },
     },
@@ -148,7 +159,12 @@ export default function NutrientNamesPage() {
               </CardDescription>
             </div>
             {canEdit && (
-              <Button onClick={() => { setSelectedItem(null); setDrawerOpen(true); }}>
+              <Button
+                onClick={() => {
+                  setSelectedItem(null)
+                  setDrawerOpen(true)
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить
               </Button>
@@ -169,7 +185,7 @@ export default function NutrientNamesPage() {
               onEdit={canEdit ? handleEdit : undefined}
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет нутриентов"
               emptyDescription="Добавьте первый нутриент"
             />
@@ -192,7 +208,6 @@ export default function NutrientNamesPage() {
           onOpenChange={setDeleteOpen}
           title={`Удалить нутриент "${selectedItem?.name}"?`}
           onConfirm={handleConfirmDelete}
-          loading={saving}
         />
       </main>
     </>

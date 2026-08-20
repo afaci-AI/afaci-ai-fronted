@@ -6,7 +6,9 @@ export default function AboutPage() {
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <Rocket className="h-8 w-8" />
       </div>
-      <p className="text-2xl font-semibold text-foreground">В будущих релизах</p>
+      <p className="text-2xl font-semibold text-foreground">
+        В будущих релизах
+      </p>
     </div>
   )
 }

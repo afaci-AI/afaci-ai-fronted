@@ -51,13 +51,6 @@ function Carousel({
   children,
   ...props
 }: React.ComponentProps<'div'> & CarouselProps) {
-  const [carouselRef, api] = useEmblaCarousel(
-    {
-      ...opts,
-      axis: orientation === 'horizontal' ? 'x' : 'y',
-    },
-    plugins,
-  )
   const [canScrollPrev, setCanScrollPrev] = React.useState(false)
   const [canScrollNext, setCanScrollNext] = React.useState(false)
 
@@ -66,6 +59,14 @@ function Carousel({
     setCanScrollPrev(api.canScrollPrev())
     setCanScrollNext(api.canScrollNext())
   }, [])
+
+  const [carouselRef, api] = useEmblaCarousel(
+    {
+      ...opts,
+      axis: orientation === 'horizontal' ? 'x' : 'y',
+    },
+    plugins,
+  )
 
   const scrollPrev = React.useCallback(() => {
     api?.scrollPrev()
@@ -95,12 +96,15 @@ function Carousel({
 
   React.useEffect(() => {
     if (!api) return
-    onSelect(api)
-    api.on('reInit', onSelect)
-    api.on('select', onSelect)
+    const handler = () => onSelect(api)
+    api.on('init', handler)
+    api.on('select', handler)
+    api.on('reInit', handler)
 
     return () => {
-      api?.off('select', onSelect)
+      api.off('init', handler)
+      api.off('select', handler)
+      api.off('reInit', handler)
     }
   }, [api, onSelect])
 

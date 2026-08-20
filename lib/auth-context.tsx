@@ -1,6 +1,13 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  type ReactNode,
+} from 'react'
 import type { User, UserRole } from './types'
 import { authApi, getToken, setToken, type AuthUser } from './api'
 
@@ -34,28 +41,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Восстановление сессии при загрузке: токен + кэш пользователя, затем проверка /me.
   useEffect(() => {
+    let cancelled = false
     const token = getToken()
-    if (!token) {
-      setIsLoading(false)
-      return
+
+    ;(async () => {
+      if (token) {
+        const cached =
+          typeof window !== 'undefined'
+            ? window.localStorage.getItem(USER_KEY)
+            : null
+        if (cached) {
+          try {
+            const cachedUser = JSON.parse(cached) as User
+            if (!cancelled) setUser(cachedUser)
+          } catch {
+            // ignore malformed cache
+          }
+        }
+        try {
+          const u = await authApi.me()
+          const mapped = toUser(u)
+          if (!cancelled) {
+            setUser(mapped)
+            window.localStorage.setItem(USER_KEY, JSON.stringify(mapped))
+          }
+        } catch {
+          // токен недействителен — выходим
+          if (!cancelled) {
+            setToken(null)
+            window.localStorage.removeItem(USER_KEY)
+            setUser(null)
+          }
+        }
+      }
+      if (!cancelled) setIsLoading(false)
+    })()
+
+    return () => {
+      cancelled = true
     }
-    const cached = typeof window !== 'undefined' ? window.localStorage.getItem(USER_KEY) : null
-    if (cached) {
-      try { setUser(JSON.parse(cached)) } catch { /* ignore */ }
-    }
-    authApi.me()
-      .then((u) => {
-        const mapped = toUser(u)
-        setUser(mapped)
-        window.localStorage.setItem(USER_KEY, JSON.stringify(mapped))
-      })
-      .catch(() => {
-        // токен недействителен — выходим
-        setToken(null)
-        window.localStorage.removeItem(USER_KEY)
-        setUser(null)
-      })
-      .finally(() => setIsLoading(false))
   }, [])
 
   const persist = useCallback((token: string, u: AuthUser) => {
@@ -65,17 +89,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(USER_KEY, JSON.stringify(mapped))
   }, [])
 
-  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    const res = await authApi.login({ email, password })
-    persist(res.access_token, res.user)
-    return true
-  }, [persist])
+  const login = useCallback(
+    async (email: string, password: string): Promise<boolean> => {
+      const res = await authApi.login({ email, password })
+      persist(res.access_token, res.user)
+      return true
+    },
+    [persist],
+  )
 
-  const register = useCallback(async (email: string, name: string, password: string): Promise<boolean> => {
-    const res = await authApi.register({ email, name, password })
-    persist(res.access_token, res.user)
-    return true
-  }, [persist])
+  const register = useCallback(
+    async (email: string, name: string, password: string): Promise<boolean> => {
+      const res = await authApi.register({ email, name, password })
+      persist(res.access_token, res.user)
+      return true
+    },
+    [persist],
+  )
 
   const logout = useCallback(() => {
     setToken(null)
@@ -89,12 +119,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout()
     }
     window.addEventListener('afaci:session-expired', handleSessionExpired)
-    return () => window.removeEventListener('afaci:session-expired', handleSessionExpired)
+    return () =>
+      window.removeEventListener('afaci:session-expired', handleSessionExpired)
   }, [logout])
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, isLoading, login, register, logout }}
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        login,
+        register,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
