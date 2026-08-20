@@ -1,4 +1,4 @@
-FROM nexus:8081/repository/docker-hub-proxy/node:20-alpine AS deps
+FROM nexus:8081/repository/docker-hub-proxy/v2/node/manifests/20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
