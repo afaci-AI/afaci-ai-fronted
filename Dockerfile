@@ -1,3 +1,5 @@
+ARG REGISTRY_PROXY
+
 FROM ${{ secrets.NEXUS_REGISTRY_PROXY }}/node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
