@@ -36,14 +36,15 @@ const roleLabels: Record<UserRole, string> = {
   viewer: 'Аналитик',
 }
 
-const roleBadgeVariants: Record<UserRole, 'default' | 'secondary' | 'outline'> = {
-  admin: 'default',
-  editor: 'secondary',
-  viewer: 'outline',
-}
+const roleBadgeVariants: Record<UserRole, 'default' | 'secondary' | 'outline'> =
+  {
+    admin: 'default',
+    editor: 'secondary',
+    viewer: 'outline',
+  }
 
 export function AppHeader({ breadcrumbs }: AppHeaderProps) {
-  const { user, logout, switchRole } = useAuth()
+  const { user, logout } = useAuth()
   const router = useRouter()
 
   const handleLogout = () => {
@@ -55,7 +56,7 @@ export function AppHeader({ breadcrumbs }: AppHeaderProps) {
     <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b border-border bg-card px-4">
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="h-6" />
-      
+
       {breadcrumbs && breadcrumbs.length > 0 && (
         <Breadcrumb>
           <BreadcrumbList>
@@ -64,7 +65,9 @@ export function AppHeader({ breadcrumbs }: AppHeaderProps) {
                 {index > 0 && <BreadcrumbSeparator />}
                 <BreadcrumbItem>
                   {crumb.href ? (
-                    <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                    <BreadcrumbLink href={crumb.href}>
+                      {crumb.label}
+                    </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                   )}
@@ -85,7 +88,10 @@ export function AppHeader({ breadcrumbs }: AppHeaderProps) {
                 </div>
                 <div className="hidden flex-col items-start text-left md:flex">
                   <span className="text-sm font-medium">{user.name}</span>
-                  <Badge variant={roleBadgeVariants[user.role]} className="text-xs">
+                  <Badge
+                    variant={roleBadgeVariants[user.role]}
+                    className="text-xs"
+                  >
                     {roleLabels[user.role]}
                   </Badge>
                 </div>
@@ -100,23 +106,10 @@ export function AppHeader({ breadcrumbs }: AppHeaderProps) {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs text-muted-foreground">
-                Демо: сменить роль
-              </DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => switchRole('admin')}>
-                <Badge variant="default" className="mr-2">Администратор</Badge>
-                {user.role === 'admin' && '✓'}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('editor')}>
-                <Badge variant="secondary" className="mr-2">Редактор</Badge>
-                {user.role === 'editor' && '✓'}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('viewer')}>
-                <Badge variant="outline" className="mr-2">Аналитик</Badge>
-                {user.role === 'viewer' && '✓'}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-destructive"
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Выйти
               </DropdownMenuItem>

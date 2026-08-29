@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import {
   Sheet,
@@ -20,7 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { FieldGroup, Field, FieldLabel, FieldMessage } from '@/components/ui/field'
+import {
+  FieldGroup,
+  Field,
+  FieldLabel,
+  FieldMessage,
+} from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 
 export interface FormField {
@@ -42,9 +47,10 @@ interface DictionaryFormDrawerProps<T> {
   onSave: (data: Record<string, string>) => Promise<void>
   existingValues?: string[]
   duplicateField?: string
+  saving?: boolean
 }
 
-export function DictionaryFormDrawer<T extends Record<string, unknown>>({
+export function DictionaryFormDrawer<T extends object>({
   open,
   onOpenChange,
   title,
@@ -54,6 +60,7 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
   onSave,
   existingValues = [],
   duplicateField,
+  saving = false,
 }: DictionaryFormDrawerProps<T>) {
   const [formData, setFormData] = useState<Record<string, string>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -61,24 +68,29 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
 
   const isEdit = !!data
 
-  useEffect(() => {
+  const buildInitialData = (): Record<string, string> => {
+    const initialData: Record<string, string> = {}
+    const dataRecord = data as Record<string, unknown> | null | undefined
+    fields.forEach((field) => {
+      initialData[field.key] = String(dataRecord?.[field.key] ?? '')
+    })
+    return initialData
+  }
+
+  // Сброс формы при открытии: синхронное обновление состояния во время рендера
+  // вместо эффекта, чтобы избежать каскадного рендера.
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (open !== prevOpen) {
+    setPrevOpen(open)
     if (open) {
-      if (data) {
-        const initialData: Record<string, string> = {}
-        fields.forEach((field) => {
-          initialData[field.key] = String(data[field.key] ?? '')
-        })
-        setFormData(initialData)
-      } else {
-        setFormData({})
-      }
+      setFormData(data ? buildInitialData() : {})
       setErrors({})
     }
-  }, [open, data, fields])
+  }
 
   const handleChange = (key: string, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }))
-    
+
     // Clear error on change
     if (errors[key]) {
       setErrors((prev) => {
@@ -94,18 +106,24 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
 
     fields.forEach((field) => {
       const value = formData[field.key]?.trim()
-      
+
       if (field.required && !value) {
         newErrors[field.key] = 'Обязательное поле'
       }
-      
+
       // Check for duplicates
       if (
         duplicateField &&
         field.key === duplicateField &&
         value &&
         existingValues.includes(value.toLowerCase()) &&
-        (!isEdit || value.toLowerCase() !== String(data?.[duplicateField]).toLowerCase())
+        (!isEdit ||
+          value.toLowerCase() !==
+            String(
+              (data as Record<string, unknown> | null | undefined)?.[
+                duplicateField
+              ],
+            ).toLowerCase())
       ) {
         newErrors[field.key] = 'Такое значение уже существует'
       }
@@ -117,7 +135,7 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validate()) return
 
     setIsSubmitting(true)
@@ -147,9 +165,11 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
               <Field key={field.key}>
                 <FieldLabel htmlFor={field.key}>
                   {field.label}
-                  {field.required && <span className="text-destructive ml-1">*</span>}
+                  {field.required && (
+                    <span className="text-destructive ml-1">*</span>
+                  )}
                 </FieldLabel>
-                
+
                 {field.type === 'text' && (
                   <Input
                     id={field.key}
@@ -159,7 +179,7 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
                     aria-invalid={!!errors[field.key]}
                   />
                 )}
-                
+
                 {field.type === 'textarea' && (
                   <Textarea
                     id={field.key}
@@ -170,14 +190,16 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
                     rows={3}
                   />
                 )}
-                
+
                 {field.type === 'select' && field.options && (
                   <Select
                     value={formData[field.key] || ''}
                     onValueChange={(value) => handleChange(field.key, value)}
                   >
                     <SelectTrigger aria-invalid={!!errors[field.key]}>
-                      <SelectValue placeholder={field.placeholder || 'Выберите...'} />
+                      <SelectValue
+                        placeholder={field.placeholder || 'Выберите...'}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {field.options.map((option) => (
@@ -188,9 +210,11 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
                     </SelectContent>
                   </Select>
                 )}
-                
+
                 {errors[field.key] && (
-                  <FieldMessage variant="error">{errors[field.key]}</FieldMessage>
+                  <FieldMessage variant="error">
+                    {errors[field.key]}
+                  </FieldMessage>
                 )}
               </Field>
             ))}
@@ -201,11 +225,11 @@ export function DictionaryFormDrawer<T extends Record<string, unknown>>({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || saving}
             >
               Отмена
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || saving}>
               {isSubmitting && <Spinner className="mr-2" />}
               {isEdit ? 'Сохранить' : 'Добавить'}
             </Button>

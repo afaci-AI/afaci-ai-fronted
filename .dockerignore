@@ -1,0 +1,13 @@
+node_modules
+.next/
+.git/
+.gitignore
+.idea/
+.vscode/
+.DS_Store
+*.log
+.env*.local
+README.md
+Dockerfile
+.dockerignore
+pnpm-lock.yaml

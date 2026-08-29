@@ -1,12 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Plus } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AppHeader } from '@/components/app-header'
 import { DataTable, type Column } from '@/components/data-table'
-import { DictionaryFormDrawer, type FormField } from '@/components/dictionary-form-drawer'
+import {
+  DictionaryFormDrawer,
+  type FormField,
+} from '@/components/dictionary-form-drawer'
 import { DeleteDialog } from '@/components/delete-dialog'
 import { useAuth } from '@/lib/auth-context'
 import { hasPermission } from '@/lib/types'
@@ -15,7 +24,7 @@ import type { Category } from '@/lib/types'
 
 const columns: Column<Category>[] = [
   { key: 'name', label: 'Название', sortable: true },
-  { key: 'id', label: 'ID', width: 'text-xs text-muted-foreground' },
+  { key: 'id', label: 'ID', className: 'text-xs text-muted-foreground' },
 ]
 
 const formFields: FormField[] = [
@@ -40,11 +49,7 @@ export default function CategoriesPage() {
   const [selectedItem, setSelectedItem] = useState<Category | null>(null)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setError(null)
       const data = await categoriesApi.list()
@@ -54,7 +59,13 @@ export default function CategoriesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      await loadData()
+    })()
+  }, [loadData])
 
   const handleEdit = (item: Category) => {
     setSelectedItem(item)
@@ -121,7 +132,12 @@ export default function CategoriesPage() {
               </CardDescription>
             </div>
             {canEdit && (
-              <Button onClick={() => { setSelectedItem(null); setDrawerOpen(true); }}>
+              <Button
+                onClick={() => {
+                  setSelectedItem(null)
+                  setDrawerOpen(true)
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить
               </Button>
@@ -141,7 +157,7 @@ export default function CategoriesPage() {
               onEdit={canEdit ? handleEdit : undefined}
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет категорий"
               emptyDescription="Добавьте первую категорию"
             />
@@ -151,7 +167,9 @@ export default function CategoriesPage() {
         <DictionaryFormDrawer
           open={drawerOpen}
           onOpenChange={setDrawerOpen}
-          title={selectedItem ? 'Редактировать категорию' : 'Добавить категорию'}
+          title={
+            selectedItem ? 'Редактировать категорию' : 'Добавить категорию'
+          }
           description="Заполните информацию о категории"
           fields={formFields}
           data={selectedItem}
@@ -166,7 +184,6 @@ export default function CategoriesPage() {
           onOpenChange={setDeleteOpen}
           title={`Удалить категорию "${selectedItem?.name}"?`}
           onConfirm={handleConfirmDelete}
-          loading={saving}
         />
       </main>
     </>

@@ -1,13 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Plus } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { AppHeader } from '@/components/app-header'
 import { DataTable, type Column, type Filter } from '@/components/data-table'
-import { DictionaryFormDrawer, type FormField } from '@/components/dictionary-form-drawer'
+import {
+  DictionaryFormDrawer,
+  type FormField,
+} from '@/components/dictionary-form-drawer'
 import { DeleteDialog } from '@/components/delete-dialog'
 import { useAuth } from '@/lib/auth-context'
 import { hasPermission } from '@/lib/types'
@@ -27,16 +36,12 @@ export default function SubcategoriesPage() {
   const [selectedItem, setSelectedItem] = useState<Subcategory | null>(null)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setError(null)
       const [subcats, cats] = await Promise.all([
         subcategoriesApi.list(),
-        categoriesApi.list()
+        categoriesApi.list(),
       ])
       setSubcategories(subcats)
       setCategories(cats)
@@ -45,7 +50,13 @@ export default function SubcategoriesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      await loadData()
+    })()
+  }, [loadData])
 
   const columns: Column<Subcategory>[] = [
     { key: 'name', label: 'Название', sortable: true },
@@ -53,8 +64,12 @@ export default function SubcategoriesPage() {
       key: 'category_id',
       label: 'Категория',
       render: (item) => {
-        const category = categories.find(c => c.id === item.category_id)
-        return category ? <Badge variant="secondary">{category.name}</Badge> : '—'
+        const category = categories.find((c) => c.id === item.category_id)
+        return category ? (
+          <Badge variant="secondary">{category.name}</Badge>
+        ) : (
+          '—'
+        )
       },
     },
   ]
@@ -100,9 +115,15 @@ export default function SubcategoriesPage() {
     setSaving(true)
     try {
       if (selectedItem) {
-        await subcategoriesApi.update(selectedItem.id, { name: data.name })
+        await subcategoriesApi.update(selectedItem.id, {
+          name: data.name,
+          category_id: data.category_id,
+        })
       } else {
-        await subcategoriesApi.create({ name: data.name })
+        await subcategoriesApi.create({
+          name: data.name,
+          category_id: data.category_id,
+        })
       }
       await loadData()
       setDrawerOpen(false)
@@ -148,7 +169,12 @@ export default function SubcategoriesPage() {
               </CardDescription>
             </div>
             {canEdit && (
-              <Button onClick={() => { setSelectedItem(null); setDrawerOpen(true); }}>
+              <Button
+                onClick={() => {
+                  setSelectedItem(null)
+                  setDrawerOpen(true)
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить
               </Button>
@@ -169,7 +195,7 @@ export default function SubcategoriesPage() {
               onEdit={canEdit ? handleEdit : undefined}
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет подкатегорий"
               emptyDescription="Добавьте первую подкатегорию"
             />
@@ -179,7 +205,11 @@ export default function SubcategoriesPage() {
         <DictionaryFormDrawer
           open={drawerOpen}
           onOpenChange={setDrawerOpen}
-          title={selectedItem ? 'Редактировать подкатегорию' : 'Добавить подкатегорию'}
+          title={
+            selectedItem
+              ? 'Редактировать подкатегорию'
+              : 'Добавить подкатегорию'
+          }
           description="Заполните информацию о подкатегории"
           fields={formFields}
           data={selectedItem}
@@ -192,7 +222,6 @@ export default function SubcategoriesPage() {
           onOpenChange={setDeleteOpen}
           title={`Удалить подкатегорию "${selectedItem?.name}"?`}
           onConfirm={handleConfirmDelete}
-          loading={saving}
         />
       </main>
     </>

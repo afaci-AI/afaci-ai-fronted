@@ -1,4 +1,5 @@
 export type UserRole = 'admin' | 'editor' | 'viewer'
+export type UserStatus = 'active' | 'blocked' | 'expired' | 'unlimited'
 
 export interface User {
   id: string
@@ -6,15 +7,27 @@ export interface User {
   name: string
   role: UserRole
   isActive: boolean
+  accessExpiresAt?: string | null
+  mustChangePassword?: boolean
+  status?: UserStatus
   createdAt: string
   lastLoginAt?: string
 }
 
-type Permission = 'canEditProducts' | 'canManageDictionaries' | 'canManageUsers'
+type Permission =
+  | 'canEditProducts'
+  | 'canManageDictionaries'
+  | 'canEditDictionaries'
+  | 'canManageUsers'
 
 const rolePermissions: Record<UserRole, Permission[]> = {
-  admin:  ['canEditProducts', 'canManageDictionaries', 'canManageUsers'],
-  editor: ['canEditProducts', 'canManageDictionaries'],
+  admin: [
+    'canEditProducts',
+    'canManageDictionaries',
+    'canEditDictionaries',
+    'canManageUsers',
+  ],
+  editor: ['canEditProducts', 'canManageDictionaries', 'canEditDictionaries'],
   viewer: [],
 }
 

@@ -1,12 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Plus } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AppHeader } from '@/components/app-header'
 import { DataTable, type Column } from '@/components/data-table'
-import { DictionaryFormDrawer, type FormField } from '@/components/dictionary-form-drawer'
+import {
+  DictionaryFormDrawer,
+  type FormField,
+} from '@/components/dictionary-form-drawer'
 import { DeleteDialog } from '@/components/delete-dialog'
 import { useAuth } from '@/lib/auth-context'
 import { hasPermission } from '@/lib/types'
@@ -25,11 +34,7 @@ export default function RegionsPage() {
   const [selectedItem, setSelectedItem] = useState<Region | null>(null)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setError(null)
       const data = await regionsApi.list()
@@ -39,11 +44,17 @@ export default function RegionsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      await loadData()
+    })()
+  }, [loadData])
 
   const columns: Column<Region>[] = [
     { key: 'name', label: 'Название', sortable: true },
-    { key: 'id', label: 'ID', width: 'text-xs text-muted-foreground' },
+    { key: 'id', label: 'ID', className: 'text-xs text-muted-foreground' },
   ]
 
   const formFields: FormField[] = [
@@ -119,7 +130,12 @@ export default function RegionsPage() {
               </CardDescription>
             </div>
             {canEdit && (
-              <Button onClick={() => { setSelectedItem(null); setDrawerOpen(true); }}>
+              <Button
+                onClick={() => {
+                  setSelectedItem(null)
+                  setDrawerOpen(true)
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить
               </Button>
@@ -139,7 +155,7 @@ export default function RegionsPage() {
               onEdit={canEdit ? handleEdit : undefined}
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет регионов"
               emptyDescription="Добавьте первый регион"
             />
@@ -162,7 +178,6 @@ export default function RegionsPage() {
           onOpenChange={setDeleteOpen}
           title={`Удалить регион "${selectedItem?.name}"?`}
           onConfirm={handleConfirmDelete}
-          loading={saving}
         />
       </main>
     </>

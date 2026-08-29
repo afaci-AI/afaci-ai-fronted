@@ -1,12 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Plus } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AppHeader } from '@/components/app-header'
 import { DataTable, type Column } from '@/components/data-table'
-import { DictionaryFormDrawer, type FormField } from '@/components/dictionary-form-drawer'
+import {
+  DictionaryFormDrawer,
+  type FormField,
+} from '@/components/dictionary-form-drawer'
 import { DeleteDialog } from '@/components/delete-dialog'
 import { useAuth } from '@/lib/auth-context'
 import { hasPermission } from '@/lib/types'
@@ -25,11 +34,7 @@ export default function NutrientTypesPage() {
   const [selectedItem, setSelectedItem] = useState<NutrientType | null>(null)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setError(null)
       const data = await nutrientTypesApi.list()
@@ -39,7 +44,13 @@ export default function NutrientTypesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      await loadData()
+    })()
+  }, [loadData])
 
   const columns: Column<NutrientType>[] = [
     { key: 'name', label: 'Название', sortable: true },
@@ -114,11 +125,17 @@ export default function NutrientTypesPage() {
             <div>
               <CardTitle>Типы нутриентов</CardTitle>
               <CardDescription>
-                Управление типами нутриентов (макронутриенты, витамины, минералы и т.д.)
+                Управление типами нутриентов (макронутриенты, витамины, минералы
+                и т.д.)
               </CardDescription>
             </div>
             {canEdit && (
-              <Button onClick={() => { setSelectedItem(null); setDrawerOpen(true); }}>
+              <Button
+                onClick={() => {
+                  setSelectedItem(null)
+                  setDrawerOpen(true)
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить
               </Button>
@@ -138,7 +155,7 @@ export default function NutrientTypesPage() {
               onEdit={canEdit ? handleEdit : undefined}
               onDelete={canEdit ? handleDelete : undefined}
               canEdit={canEdit ?? false}
-              loading={loading}
+              isLoading={loading}
               emptyMessage="Нет типов нутриентов"
               emptyDescription="Добавьте первый тип"
             />
@@ -161,7 +178,6 @@ export default function NutrientTypesPage() {
           onOpenChange={setDeleteOpen}
           title={`Удалить тип "${selectedItem?.name}"?`}
           onConfirm={handleConfirmDelete}
-          loading={saving}
         />
       </main>
     </>
