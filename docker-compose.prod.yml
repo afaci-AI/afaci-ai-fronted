@@ -1,0 +1,18 @@
+name: afaci
+
+services:
+  frontend:
+    build:
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      BACKEND_URL: ${BACKEND_URL}
+    ports:
+      - "${FRONTEND_PORT:-86}:3000"
+    networks:
+      - afaci-network
+volumes:
+  afaci-pgdata:
+networks:
+  afaci-network:
+    driver: bridge
