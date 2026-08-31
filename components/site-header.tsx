@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Database,
+  Download,
   Menu,
   LogOut,
   LayoutDashboard,
@@ -30,6 +31,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/lib/auth-context'
 import { cn } from '@/lib/utils'
+import { useApkDownload } from '@/hooks/use-apk-download'
 
 const baseNavItems = [
   { label: 'Главная', href: '/' },
@@ -63,6 +65,7 @@ export function SiteHeader() {
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuth()
   const [open, setOpen] = useState(false)
+  const { apkUrl, version, showDownload } = useApkDownload()
   const navItems = isAuthenticated
     ? [...baseNavItems, ...authNavItems]
     : baseNavItems
@@ -195,6 +198,28 @@ export function SiteHeader() {
                   </Link>
                 ))}
               </nav>
+
+              {showDownload && apkUrl && (
+                <div className="px-3 pb-1">
+                  <a
+                    href={apkUrl}
+                    download
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      'flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
+                      'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                    )}
+                  >
+                    <Download className="h-4 w-4" />
+                    Скачать приложение
+                    {version && (
+                      <span className="text-xs text-muted-foreground/70">
+                        v{version}
+                      </span>
+                    )}
+                  </a>
+                </div>
+              )}
 
               <div className="border-t border-border p-3">
                 {isAuthenticated && user ? (
