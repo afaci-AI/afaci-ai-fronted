@@ -27,19 +27,18 @@ jobs:
       - run: npx prettier --check .
       - run: npx tsc --noEmit
       
-  build:
-    name: build
-    runs-on: afaci-runner-01
-    needs: frontend-analysis
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-
-      - run: |
-            docker build \
-              --build-arg REGISTRY_PROXY=${{ secrets.NEXUS_REGISTRY_PROXY }} \
-              -t ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.IMAGE_NAME }}:${{ github.sha }} .
-      - run: docker save ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.IMAGE_NAME }}:${{ github.sha }}
+build:
+  name: build
+  runs-on: afaci-runner-01
+  needs: frontend-analysis
+  steps:
+    - name: Check out repository
+      uses: actions/checkout@v6
+    
+    - run: |
+          docker build \
+            --build-arg REGISTRY_PROXY=${{ secrets.NEXUS_REGISTRY_PROXY }} \
+            -t ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.IMAGE_NAME }}:${{ github.sha }} .
       
 
   image-push:
