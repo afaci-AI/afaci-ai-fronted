@@ -11,8 +11,10 @@ services:
       - "${FRONTEND_PORT:-86}:3000"
     networks:
       - afaci-network
+
 volumes:
   afaci-pgdata:
+
 networks:
   afaci-network:
     driver: bridge
