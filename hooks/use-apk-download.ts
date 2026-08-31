@@ -45,8 +45,12 @@ function initFromCache(): { apkUrl: string | null; version: string | null } {
 }
 
 export function useApkDownload() {
-  const [apkUrl, setApkUrl] = useState<string | null>(() => initFromCache().apkUrl)
-  const [version, setVersion] = useState<string | null>(() => initFromCache().version)
+  const [apkUrl, setApkUrl] = useState<string | null>(
+    () => initFromCache().apkUrl,
+  )
+  const [version, setVersion] = useState<string | null>(
+    () => initFromCache().version,
+  )
 
   useEffect(() => {
     if (!isAndroid()) return
