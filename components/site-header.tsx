@@ -211,7 +211,7 @@ export function SiteHeader() {
                     )}
                   >
                     <Download className="h-4 w-4" />
-                    Скачать приложение
+                    Скачать мобильное приложение
                     {version && (
                       <span className="text-xs text-muted-foreground/70">
                         v{version}

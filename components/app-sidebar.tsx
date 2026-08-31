@@ -10,6 +10,7 @@ import {
   FlaskConical,
   Scale,
   Users,
+  Smartphone,
   ChevronDown,
   Database,
 } from 'lucide-react'
@@ -204,6 +205,18 @@ export function AppSidebar() {
                     <Link href="/users">
                       <Users className="h-4 w-4" />
                       <span>Пользователи</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === '/app-versions'}
+                    tooltip="Версии приложения"
+                  >
+                    <Link href="/app-versions">
+                      <Smartphone className="h-4 w-4" />
+                      <span>Версии приложения</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

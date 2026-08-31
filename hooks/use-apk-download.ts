@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { isAndroid } from '@/lib/platform'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface AppVersionResponse {
   version: string
@@ -38,13 +38,13 @@ function resolveApkUrl(raw: string): string {
 }
 
 function initFromCache(): { apkUrl: string | null; version: string | null } {
-  if (!isAndroid()) return { apkUrl: null, version: null }
   const cached = readCache()
   if (!cached?.apkUrl) return { apkUrl: null, version: null }
   return { apkUrl: resolveApkUrl(cached.apkUrl), version: cached.version }
 }
 
 export function useApkDownload() {
+  const isMobile = useIsMobile()
   const [apkUrl, setApkUrl] = useState<string | null>(
     () => initFromCache().apkUrl,
   )
@@ -53,7 +53,7 @@ export function useApkDownload() {
   )
 
   useEffect(() => {
-    if (!isAndroid()) return
+    if (!isMobile) return
     if (apkUrl) return
 
     fetch('/api/v1/app/version')
@@ -70,7 +70,7 @@ export function useApkDownload() {
         setApkUrl(null)
         setVersion(null)
       })
-  }, [apkUrl])
+  }, [isMobile, apkUrl])
 
-  return { apkUrl, version, showDownload: isAndroid() && !!apkUrl }
+  return { apkUrl, version, showDownload: isMobile && !!apkUrl }
 }
