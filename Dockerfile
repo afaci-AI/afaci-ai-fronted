@@ -1,11 +1,11 @@
 ARG REGISTRY_PROXY
 
-FROM ${REGISTRY_PROXY}/node:20-alpine AS deps
+FROM ${REGISTRY_PROXY}/library/node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM ${REGISTRY_PROXY}/node:20-alpine AS builder
+FROM ${REGISTRY_PROXY}/library/node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -14,7 +14,7 @@ ENV BACKEND_URL=$BACKEND_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM ${REGISTRY_PROXY}/node:20-alpine AS runner
+FROM ${REGISTRY_PROXY}/library/node:20-alpine AS runner
 WORKDIR /app
 
 RUN apk add --no-cache curl \
