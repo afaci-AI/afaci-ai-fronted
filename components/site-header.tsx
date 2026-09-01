@@ -201,23 +201,19 @@ export function SiteHeader() {
 
               {showDownload && apkUrl && (
                 <div className="px-3 pb-1">
-                  <a
-                    href={apkUrl}
-                    download
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      'flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
-                      'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-                    )}
-                  >
-                    <Download className="h-4 w-4" />
-                    Скачать мобильное приложение
-                    {version && (
-                      <span className="text-xs text-muted-foreground/70">
-                        v{version}
+                  <Button asChild className="w-full justify-start gap-2">
+                    <a href={apkUrl} download onClick={() => setOpen(false)}>
+                      <Download className="h-4 w-4" />
+                      <span className="flex-1">
+                        Скачать мобильное приложение
                       </span>
-                    )}
-                  </a>
+                      {version && (
+                        <span className="text-xs text-primary-foreground/70">
+                          v{version}
+                        </span>
+                      )}
+                    </a>
+                  </Button>
                 </div>
               )}
 
