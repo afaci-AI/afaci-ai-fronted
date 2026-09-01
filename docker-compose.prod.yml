@@ -8,11 +8,13 @@ services:
     environment:
       BACKEND_URL: ${BACKEND_URL}
     ports:
-      - "${FRONTEND_PORT:-86}:3000"
+      - '${FRONTEND_PORT:-86}:3000'
     networks:
       - afaci-network
+
 volumes:
   afaci-pgdata:
+
 networks:
   afaci-network:
     driver: bridge
