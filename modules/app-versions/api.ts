@@ -49,6 +49,7 @@ export interface AppVersionUpdateData {
 export interface UploadApkResponse {
   filename: string
   url: string
+  size: number
 }
 
 export const appVersionsApi = {

@@ -84,6 +84,12 @@ function toDate(value: string): string {
   })
 }
 
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} Б`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} КБ`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} МБ`
+}
+
 export default function AppVersionsPage() {
   const { user: currentUser } = useAuth()
   const router = useRouter()
@@ -103,6 +109,7 @@ export default function AppVersionsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadedFilename, setUploadedFilename] = useState<string | null>(null)
+  const [uploadedSize, setUploadedSize] = useState<number | null>(null)
 
   const canManage =
     !!currentUser && hasPermission(currentUser.role, 'canManageUsers')
@@ -191,10 +198,15 @@ export default function AppVersionsPage() {
       toast.error('Файл должен иметь расширение .apk')
       return
     }
+    if (file.size === 0) {
+      toast.error('Файл пуст')
+      return
+    }
     setIsUploading(true)
     try {
-      const { filename } = await appVersionsApi.uploadApk(file)
+      const { filename, size } = await appVersionsApi.uploadApk(file)
       setUploadedFilename(filename)
+      setUploadedSize(size)
       setCreateOpen(true)
     } catch (err) {
       toast.error(
@@ -474,6 +486,7 @@ export default function AppVersionsPage() {
                   <Input value={uploadedFilename ?? ''} disabled readOnly />
                   <p className="text-xs text-muted-foreground">
                     Файл загружен на сервер
+                    {uploadedSize ? ` (${formatBytes(uploadedSize)})` : ''}
                   </p>
                 </Field>
                 <Field>
