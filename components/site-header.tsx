@@ -60,6 +60,11 @@ function initials(name: string) {
     .toUpperCase()
 }
 
+function apkDownloadName(version: string | null): string {
+  const clean = (version ?? '').replace(/[^A-Za-z0-9._-]/g, '_')
+  return clean ? `foodcraftsl-release-${clean}.apk` : 'foodcraftsl-release.apk'
+}
+
 export function SiteHeader() {
   const pathname = usePathname()
   const router = useRouter()
@@ -202,7 +207,11 @@ export function SiteHeader() {
               {showDownload && apkUrl && (
                 <div className="px-3 pb-1">
                   <Button asChild className="w-full justify-start gap-2">
-                    <a href={apkUrl} download onClick={() => setOpen(false)}>
+                    <a
+                      href={apkUrl}
+                      download={apkDownloadName(version)}
+                      onClick={() => setOpen(false)}
+                    >
                       <Download className="h-4 w-4" />
                       <span className="flex-1">
                         Скачать мобильное приложение
