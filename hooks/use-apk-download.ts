@@ -54,7 +54,6 @@ export function useApkDownload() {
 
   useEffect(() => {
     if (!isMobile) return
-    if (apkUrl) return
 
     fetch('/api/v1/app/version')
       .then((res) => {
@@ -70,7 +69,7 @@ export function useApkDownload() {
         setApkUrl(null)
         setVersion(null)
       })
-  }, [isMobile, apkUrl])
+  }, [isMobile])
 
   return { apkUrl, version, showDownload: isMobile && !!apkUrl }
 }
