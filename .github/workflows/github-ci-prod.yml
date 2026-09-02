@@ -46,24 +46,25 @@ jobs:
 
 
   deploy:
-    runs-on: afaci-runner-01
-    needs: build
-    steps:
-      - name: Execute remote SSH commands
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          envs: APP_PATH
-          script: |
-            cd $APP_PATH
-            git fetch --tags
-            git checkout tags/${{ github.ref_name }}
-            docker compose -f docker-compose.prod.yml up --build -d
-        env:
-          APP_PATH: ${{ vars.APP_PATH }}
+      runs-on: afaci-runner-01
+      needs: build
+      steps:
+        - name: Execute remote SSH commands
+          uses: appleboy/ssh-action@v1.0.3
+          with:
+            host: ${{ secrets.SSH_HOST }}
+            username: ${{ secrets.SSH_USER }}
+            key: ${{ secrets.SSH_KEY }}
+            port: ${{ secrets.SSH_PORT }}
+            envs: APP_PATH,GH_PAT
+            script: |
+              cd $APP_PATH
+              git fetch https://x-access-token:${GH_PAT}@github.com/afaci-AI/afaci-ai-fronted.git --tags --force
+              git checkout tags/${{ github.ref_name }}
+              docker compose -f docker-compose.prod.yml up --build -d
+          env:
+            APP_PATH: ${{ vars.APP_PATH }}
+            GH_PAT: ${{ secrets.GH_PAT }}
 
 
   create-release:
