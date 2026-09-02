@@ -1,0 +1,82 @@
+name: ci-prod
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  frontend-analysis:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+  
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+          cache: 'npm'
+          cache-dependency-path: './package-lock.json'
+  
+      - run: npm ci
+      - run: npx eslint .
+      - run: npx prettier --check .
+      - run: npx tsc --noEmit
+
+
+  build:
+    name: build
+    runs-on: afaci-runner-01
+    needs:
+      - frontend-analysis
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Extract Tag Name
+        id: vars
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - run: docker build -f Dockerfile.prod -t afaci-ai-frontend:${{ env.TAG_NAME }} -t afaci-ai-frontend:prod .
+
+
+  deploy:
+    runs-on: afaci-runner-01
+    needs: build
+    steps:
+      - name: Execute remote SSH commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          envs: APP_PATH
+          script: |
+            cd $APP_PATH
+            git fetch --tags
+            git checkout tags/${{ github.ref_name }}
+            docker compose -f docker-compose.prod.yml up --build -d
+        env:
+          APP_PATH: ${{ vars.APP_PATH }}
+
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: afaci-runner-01
+    needs: deploy
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
