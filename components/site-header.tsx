@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Database,
+  Download,
   Menu,
   LogOut,
   LayoutDashboard,
@@ -30,6 +31,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/lib/auth-context'
 import { cn } from '@/lib/utils'
+import { useApkDownload } from '@/hooks/use-apk-download'
 
 const baseNavItems = [
   { label: 'Главная', href: '/' },
@@ -58,11 +60,17 @@ function initials(name: string) {
     .toUpperCase()
 }
 
+function apkDownloadName(version: string | null): string {
+  const clean = (version ?? '').replace(/[^A-Za-z0-9._-]/g, '_')
+  return clean ? `foodcraftsl-release-${clean}.apk` : 'foodcraftsl-release.apk'
+}
+
 export function SiteHeader() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuth()
   const [open, setOpen] = useState(false)
+  const { apkUrl, version, showDownload } = useApkDownload()
   const navItems = isAuthenticated
     ? [...baseNavItems, ...authNavItems]
     : baseNavItems
@@ -195,6 +203,28 @@ export function SiteHeader() {
                   </Link>
                 ))}
               </nav>
+
+              {showDownload && apkUrl && (
+                <div className="px-3 pb-1">
+                  <Button asChild className="w-full justify-start gap-2">
+                    <a
+                      href={apkUrl}
+                      download={apkDownloadName(version)}
+                      onClick={() => setOpen(false)}
+                    >
+                      <Download className="h-4 w-4" />
+                      <span className="flex-1">
+                        Скачать мобильное приложение
+                      </span>
+                      {version && (
+                        <span className="text-xs text-primary-foreground/70">
+                          v{version}
+                        </span>
+                      )}
+                    </a>
+                  </Button>
+                </div>
+              )}
 
               <div className="border-t border-border p-3">
                 {isAuthenticated && user ? (
