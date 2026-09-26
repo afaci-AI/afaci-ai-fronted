@@ -38,7 +38,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -55,6 +54,8 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { AppHeader } from '@/components/app-header'
 import { DeleteDialog } from '@/components/delete-dialog'
+import { NumericInput } from '@/components/numeric-input'
+import { parseNumberInput } from '@/lib/number'
 import { useAuth } from '@/lib/auth-context'
 import { hasPermission } from '@/lib/types'
 import {
@@ -175,7 +176,7 @@ export default function ProductDetailPage({
     if (!formData.nutrient_name_id)
       newErrs.nutrient_name_id = 'Выберите нутриент'
     if (!formData.unit_id) newErrs.unit_id = 'Выберите единицу'
-    if (!formData.quantity || isNaN(Number(formData.quantity)))
+    if (parseNumberInput(formData.quantity) === null)
       newErrs.quantity = 'Введите число'
     setErrors(newErrs)
     return Object.keys(newErrs).length === 0
@@ -184,19 +185,21 @@ export default function ProductDetailPage({
   const handleSaveNutrient = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
+
+    const quantity = parseNumberInput(formData.quantity)
+    if (quantity === null) return
+
     setIsSubmitting(true)
     try {
       if (selectedNutrient) {
-        await nutrientsApi.update(selectedNutrient.id, {
-          quantity: Number(formData.quantity),
-        })
+        await nutrientsApi.update(selectedNutrient.id, { quantity })
         toast.success('Нутриент обновлён')
       } else {
         await nutrientsApi.create({
           product_id: id,
           nutrient_name_id: formData.nutrient_name_id,
           unit_id: formData.unit_id,
-          quantity: Number(formData.quantity),
+          quantity,
         })
         toast.success('Нутриент добавлен')
       }
@@ -595,12 +598,11 @@ export default function ProductDetailPage({
                 </Field>
                 <Field>
                   <FieldLabel>Количество *</FieldLabel>
-                  <Input
-                    type="number"
-                    step="any"
-                    placeholder="Например: 3.2"
+                  <NumericInput
+                    placeholder="Например: 3,2"
                     value={formData.quantity}
-                    onChange={(e) => handleChange('quantity', e.target.value)}
+                    onValueChange={(v) => handleChange('quantity', v)}
+                    aria-invalid={!!errors.quantity}
                   />
                   {errors.quantity && (
                     <FieldMessage variant="error">

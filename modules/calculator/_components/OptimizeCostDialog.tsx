@@ -11,9 +11,10 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { NumericInput } from '@/components/numeric-input'
+import { parseNumberInput } from '@/lib/number'
 import type { Row } from '../_hooks/useCalculator'
 import type { OptConstraints } from '../api'
 import type { CalcProduct } from '@/modules/products/api'
@@ -63,8 +64,8 @@ export function OptimizeCostDialog({
 
   const handleSubmit = () => {
     const constraints: OptConstraints = {
-      bc_min: bcMin ? parseFloat(bcMin) : undefined,
-      kras_max: krasMax ? parseFloat(krasMax) : undefined,
+      bc_min: parseNumberInput(bcMin) ?? undefined,
+      kras_max: parseNumberInput(krasMax) ?? undefined,
     }
     onOptimize(constraints, bounds)
     setOpen(false)
@@ -107,27 +108,20 @@ export function OptimizeCostDialog({
                 <Label className="text-xs text-muted-foreground">
                   БЦ ≥ (%, необяз.)
                 </Label>
-                <Input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
+                <NumericInput
                   placeholder="напр. 60"
                   value={bcMin}
-                  onChange={(e) => setBcMin(e.target.value)}
+                  onValueChange={setBcMin}
                 />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">
                   КРАС ≤ (%, необяз.)
                 </Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="1"
+                <NumericInput
                   placeholder="напр. 30"
                   value={krasMax}
-                  onChange={(e) => setKrasMax(e.target.value)}
+                  onValueChange={setKrasMax}
                 />
               </div>
             </div>
@@ -159,27 +153,15 @@ export function OptimizeCostDialog({
                         <span className="truncate text-sm">
                           {productName(row.product_id)}
                         </span>
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.1"
+                        <NumericInput
                           placeholder="0"
                           value={bound?.min ?? ''}
-                          onChange={(e) =>
-                            patchBound(row.key, { min: e.target.value })
-                          }
+                          onValueChange={(v) => patchBound(row.key, { min: v })}
                         />
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.1"
+                        <NumericInput
                           placeholder="100"
                           value={bound?.max ?? ''}
-                          onChange={(e) =>
-                            patchBound(row.key, { max: e.target.value })
-                          }
+                          onValueChange={(v) => patchBound(row.key, { max: v })}
                         />
                       </div>
                     )

@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/auth-context'
+import { parseNumberInput, toInputValue } from '@/lib/number'
 import {
   calculatorApi,
   type OptConstraints,
@@ -76,8 +77,8 @@ export function useCalculator() {
               rec.items.map((it) => ({
                 key: rowSeq++,
                 product_id: it.product_id,
-                amount: String(it.amount_g),
-                price: it.price_per_kg != null ? String(it.price_per_kg) : '',
+                amount: toInputValue(it.amount_g),
+                price: toInputValue(it.price_per_kg),
               })),
             )
             setRefId(rec.reference_protein_id || def?.id || '')
@@ -102,11 +103,7 @@ export function useCalculator() {
 
   const selectedRef = references.find((r) => r.id === refId)
   const sum = useMemo(
-    () =>
-      rows.reduce(
-        (s, r) => s + (parseFloat(r.amount.replace(',', '.')) || 0),
-        0,
-      ),
+    () => rows.reduce((s, r) => s + (parseNumberInput(r.amount) ?? 0), 0),
     [rows],
   )
   const allSelected =
@@ -135,8 +132,8 @@ export function useCalculator() {
     const allPriced = rows.every((r) => r.price !== '')
     if (!allPriced) return null
     return rows.reduce((s, r) => {
-      const amt = parseFloat(r.amount.replace(',', '.')) || 0
-      const price = parseFloat(r.price.replace(',', '.')) || 0
+      const amt = parseNumberInput(r.amount) ?? 0
+      const price = parseNumberInput(r.price) ?? 0
       return s + amt * price
     }, 0)
   }, [costEnabled, rows])
@@ -148,7 +145,7 @@ export function useCalculator() {
       rec.items.map((it) => ({
         key: rowSeq++,
         product_id: it.product_id,
-        amount: String(it.amount_g),
+        amount: toInputValue(it.amount_g),
         price: '',
       })),
     )
@@ -170,7 +167,7 @@ export function useCalculator() {
         reference_protein_id: refId,
         items: rows.map((r) => ({
           product_id: r.product_id,
-          amount_g: parseFloat(r.amount.replace(',', '.')) || 0,
+          amount_g: parseNumberInput(r.amount) ?? 0,
         })),
       })
       setResult(res)
@@ -201,9 +198,9 @@ export function useCalculator() {
         .filter((r) => r.product_id && r.price !== '')
         .map((r) => ({
           product_id: r.product_id,
-          price_per_kg: parseFloat(r.price.replace(',', '.')) || 0,
-          min_amount_g: parseFloat(boundMap.get(r.key)?.min || '0') || 0,
-          max_amount_g: parseFloat(boundMap.get(r.key)?.max || '100') || 100,
+          price_per_kg: parseNumberInput(r.price) ?? 0,
+          min_amount_g: parseNumberInput(boundMap.get(r.key)?.min ?? '') ?? 0,
+          max_amount_g: parseNumberInput(boundMap.get(r.key)?.max ?? '') ?? 100,
         }))
 
       const res = await calculatorApi.optimizeCost({
@@ -218,7 +215,7 @@ export function useCalculator() {
       setRows((rs) =>
         rs.map((r) =>
           amountMap.has(r.product_id)
-            ? { ...r, amount: String(amountMap.get(r.product_id)!.toFixed(4)) }
+            ? { ...r, amount: toInputValue(amountMap.get(r.product_id)!, 4) }
             : r,
         ),
       )

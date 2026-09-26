@@ -18,7 +18,6 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
@@ -29,6 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { NumericInput } from '@/components/numeric-input'
+import { parseNumberInput } from '@/lib/number'
 import { cn } from '@/lib/utils'
 import {
   useCalculator,
@@ -195,28 +196,16 @@ export default function CalculatorPage() {
                           !usedIds.includes(p.product_id),
                       )}
                     />
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputMode="decimal"
+                    <NumericInput
                       placeholder="0"
                       value={row.amount}
-                      onChange={(e) =>
-                        patchRow(row.key, { amount: e.target.value })
-                      }
+                      onValueChange={(v) => patchRow(row.key, { amount: v })}
                     />
                     {costEnabled && (
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        inputMode="decimal"
+                      <NumericInput
                         placeholder="0"
                         value={row.price}
-                        onChange={(e) =>
-                          patchRow(row.key, { price: e.target.value })
-                        }
+                        onValueChange={(v) => patchRow(row.key, { price: v })}
                       />
                     )}
                     <Button
@@ -297,10 +286,10 @@ export default function CalculatorPage() {
                       .filter((r) => r.product_id && r.amount !== '')
                       .map((r) => ({
                         product_id: r.product_id,
-                        amount_g: parseFloat(r.amount.replace(',', '.')) || 0,
+                        amount_g: parseNumberInput(r.amount) ?? 0,
                         price_per_kg:
                           costEnabled && r.price !== ''
-                            ? parseFloat(r.price.replace(',', '.')) || null
+                            ? (parseNumberInput(r.price) ?? null)
                             : null,
                       }))}
                   />
