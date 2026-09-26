@@ -283,7 +283,10 @@ export default function CalculatorPage() {
                     editing={editing}
                     computable={canCompute}
                     items={rows
-                      .filter((r) => r.product_id && r.amount !== '')
+                      .filter(
+                        (r) =>
+                          r.product_id && parseNumberInput(r.amount) !== null,
+                      )
                       .map((r) => ({
                         product_id: r.product_id,
                         amount_g: parseNumberInput(r.amount) ?? 0,

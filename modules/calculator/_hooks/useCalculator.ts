@@ -107,13 +107,14 @@ export function useCalculator() {
     [rows],
   )
   const allSelected =
-    rows.length > 0 && rows.every((r) => r.product_id && r.amount !== '')
+    rows.length > 0 &&
+    rows.every((r) => r.product_id && parseNumberInput(r.amount) !== null)
   const sumValid = Math.abs(sum - REQUIRED_SUM) < 0.01
   const canCompute = allSelected && sumValid && !!refId
   const canOptimize =
     costEnabled &&
     rows.length > 0 &&
-    rows.every((r) => r.product_id && r.price !== '') &&
+    rows.every((r) => r.product_id && parseNumberInput(r.price) !== null) &&
     !!refId
   const usedIds = rows.map((r) => r.product_id).filter(Boolean)
 
@@ -129,7 +130,7 @@ export function useCalculator() {
 
   const totalCost = useMemo(() => {
     if (!costEnabled) return null
-    const allPriced = rows.every((r) => r.price !== '')
+    const allPriced = rows.every((r) => parseNumberInput(r.price) !== null)
     if (!allPriced) return null
     return rows.reduce((s, r) => {
       const amt = parseNumberInput(r.amount) ?? 0
@@ -195,7 +196,7 @@ export function useCalculator() {
     try {
       const boundMap = new Map(bounds.map((b) => [b.key, b]))
       const candidates = rows
-        .filter((r) => r.product_id && r.price !== '')
+        .filter((r) => r.product_id && parseNumberInput(r.price) !== null)
         .map((r) => ({
           product_id: r.product_id,
           price_per_kg: parseNumberInput(r.price) ?? 0,

@@ -43,7 +43,9 @@ export function OptimizeCostDialog({
   const [krasMax, setKrasMax] = useState('')
   const [bounds, setBounds] = useState<BoundRow[]>([])
 
-  const eligibleRows = rows.filter((r) => r.product_id && r.price !== '')
+  const eligibleRows = rows.filter(
+    (r) => r.product_id && parseNumberInput(r.price) !== null,
+  )
 
   // Сброс границ при открытии: синхронное обновление состояния во время рендера.
   const [prevOpen, setPrevOpen] = useState(open)
