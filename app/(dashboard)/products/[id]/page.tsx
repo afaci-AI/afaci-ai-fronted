@@ -55,6 +55,7 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { AppHeader } from '@/components/app-header'
 import { DeleteDialog } from '@/components/delete-dialog'
+import { NutrientExistsDialog } from '@/components/nutrient-exists-dialog'
 import { useAuth } from '@/lib/auth-context'
 import { hasPermission } from '@/lib/types'
 import {
@@ -98,6 +99,9 @@ export default function ProductDetailPage({
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [duplicateNutrient, setDuplicateNutrient] = useState<Nutrient | null>(
+    null,
+  )
   const [selectedNutrient, setSelectedNutrient] = useState<Nutrient | null>(
     null,
   )
@@ -157,6 +161,7 @@ export default function ProductDetailPage({
       setFormData({ nutrient_name_id: '', unit_id: '', quantity: '' })
     }
     setErrors({})
+    setDuplicateNutrient(null)
     setDrawerOpen(true)
   }
 
@@ -184,6 +189,17 @@ export default function ProductDetailPage({
   const handleSaveNutrient = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
+
+    if (!selectedNutrient) {
+      const existing = nutrients.find(
+        (n) => n.nutrient_name_id === formData.nutrient_name_id,
+      )
+      if (existing) {
+        setDuplicateNutrient(existing)
+        return
+      }
+    }
+
     setIsSubmitting(true)
     try {
       if (selectedNutrient) {
@@ -207,6 +223,23 @@ export default function ProductDetailPage({
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleUpdateDuplicate = async () => {
+    if (!duplicateNutrient) return
+    await nutrientsApi.update(duplicateNutrient.id, {
+      quantity: Number(formData.quantity),
+      unit_id: formData.unit_id,
+    })
+    toast.success('Нутриент обновлён')
+    await loadData()
+    setDuplicateNutrient(null)
+    setDrawerOpen(false)
+  }
+
+  const handleSkipDuplicate = () => {
+    setDuplicateNutrient(null)
+    setDrawerOpen(false)
   }
 
   const handleDeleteNutrient = (nutrient: Nutrient) => {
@@ -649,6 +682,24 @@ export default function ProductDetailPage({
             </form>
           </SheetContent>
         </Sheet>
+
+        <NutrientExistsDialog
+          open={!!duplicateNutrient}
+          onOpenChange={(open) => {
+            if (!open) handleSkipDuplicate()
+          }}
+          nutrientName={
+            nutrientNames.find(
+              (x) => x.id === duplicateNutrient?.nutrient_name_id,
+            )?.name || 'Нутриент'
+          }
+          currentQuantity={duplicateNutrient?.quantity ?? 0}
+          currentUnit={
+            units.find((x) => x.id === duplicateNutrient?.unit_id)?.name || ''
+          }
+          onUpdate={handleUpdateDuplicate}
+          onSkip={handleSkipDuplicate}
+        />
 
         <DeleteDialog
           open={deleteOpen}
