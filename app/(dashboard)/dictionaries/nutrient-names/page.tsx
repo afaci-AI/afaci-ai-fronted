@@ -111,9 +111,15 @@ export default function NutrientNamesPage() {
     setSaving(true)
     try {
       if (selectedItem) {
-        await nutrientNamesApi.update(selectedItem.id, { name: data.name })
+        await nutrientNamesApi.update(selectedItem.id, {
+          name: data.name,
+          nutrient_type_id: data.nutrient_type_id,
+        })
       } else {
-        await nutrientNamesApi.create({ name: data.name })
+        await nutrientNamesApi.create({
+          name: data.name,
+          nutrient_type_id: data.nutrient_type_id,
+        })
       }
       await loadData()
       setDrawerOpen(false)
