@@ -59,16 +59,12 @@ import { hasPermission } from '@/lib/types'
 import { appVersionsApi, type AppVersionAdmin } from '@/modules/app-versions'
 
 interface VersionFormData {
-  version: string
-  versionCode: string
   changelog: string
   forceUpdate: boolean
   minSupportedVersionCode: string
 }
 
 const emptyForm: VersionFormData = {
-  version: '',
-  versionCode: '',
   changelog: '',
   forceUpdate: false,
   minSupportedVersionCode: '',
@@ -108,8 +104,7 @@ export default function AppVersionsPage() {
   >({})
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [uploadedFilename, setUploadedFilename] = useState<string | null>(null)
-  const [uploadedSize, setUploadedSize] = useState<number | null>(null)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
 
   const canManage =
     !!currentUser && hasPermission(currentUser.role, 'canManageUsers')
@@ -146,8 +141,6 @@ export default function AppVersionsPage() {
   const resetForm = (v?: AppVersionAdmin) => {
     if (v) {
       setFormData({
-        version: v.version,
-        versionCode: String(v.versionCode),
         changelog: v.changelog ?? '',
         forceUpdate: v.forceUpdate,
         minSupportedVersionCode:
@@ -177,12 +170,6 @@ export default function AppVersionsPage() {
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof VersionFormData, string>> = {}
-    if (!formData.version.trim()) newErrors.version = 'Версия обязательна'
-    if (!formData.versionCode.trim()) {
-      newErrors.versionCode = 'Version code обязателен'
-    } else if (!/^\d+$/.test(formData.versionCode.trim())) {
-      newErrors.versionCode = 'Число'
-    }
     if (
       formData.minSupportedVersionCode &&
       !/^\d+$/.test(formData.minSupportedVersionCode.trim())
@@ -193,7 +180,7 @@ export default function AppVersionsPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleUploadApk = async (file: File) => {
+  const handleSelectApk = (file: File) => {
     if (!file.name.toLowerCase().endsWith('.apk')) {
       toast.error('Файл должен иметь расширение .apk')
       return
@@ -202,45 +189,39 @@ export default function AppVersionsPage() {
       toast.error('Файл пуст')
       return
     }
+    setPendingFile(file)
+    resetForm()
+    setCreateOpen(true)
+  }
+
+  // Версия и код читаются backend из APK; здесь задаётся только обязательность.
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!pendingFile || !validate()) return
+    setIsSubmitting(true)
     setIsUploading(true)
     try {
-      const { filename, size } = await appVersionsApi.uploadApk(file)
-      setUploadedFilename(filename)
-      setUploadedSize(size)
-      setCreateOpen(true)
+      const created = await appVersionsApi.uploadApk(pendingFile, {
+        forceUpdate: formData.forceUpdate,
+        changelog: formData.changelog.trim() || null,
+        minSupportedVersionCode: formData.minSupportedVersionCode
+          ? Number(formData.minSupportedVersionCode.trim())
+          : null,
+      })
+      setVersions((prev) => [
+        created,
+        ...prev.map((item) => ({ ...item, isCurrent: false })),
+      ])
+      toast.success(`Версия ${created.version} опубликована`)
+      setCreateOpen(false)
+      setPendingFile(null)
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : 'Не удалось загрузить APK',
       )
     } finally {
-      setIsUploading(false)
-    }
-  }
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validate()) return
-    setIsSubmitting(true)
-    try {
-      const created = await appVersionsApi.create({
-        version: formData.version.trim(),
-        versionCode: Number(formData.versionCode.trim()),
-        apkFilename: uploadedFilename ?? '',
-        changelog: formData.changelog.trim() || null,
-        forceUpdate: formData.forceUpdate,
-        minSupportedVersionCode: formData.minSupportedVersionCode
-          ? Number(formData.minSupportedVersionCode.trim())
-          : null,
-        isCurrent: versions.length === 0,
-      })
-      setVersions((prev) => [created, ...prev])
-      toast.success('Версия создана')
-      setCreateOpen(false)
-      setUploadedFilename(null)
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Произошла ошибка')
-    } finally {
       setIsSubmitting(false)
+      setIsUploading(false)
     }
   }
 
@@ -251,7 +232,6 @@ export default function AppVersionsPage() {
     setIsSubmitting(true)
     try {
       const updated = await appVersionsApi.update(selectedVersion.id, {
-        version: formData.version.trim(),
         changelog: formData.changelog.trim() || null,
         forceUpdate: formData.forceUpdate,
         minSupportedVersionCode: formData.minSupportedVersionCode
@@ -299,7 +279,16 @@ export default function AppVersionsPage() {
   const handleConfirmDelete = async () => {
     if (!selectedVersion) return
     await appVersionsApi.delete(selectedVersion.id)
-    setVersions((prev) => prev.filter((v) => v.id !== selectedVersion.id))
+    // Если удалена текущая, backend назначает текущей версию с наибольшим кодом.
+    const rest = versions.filter((v) => v.id !== selectedVersion.id)
+    if (selectedVersion.isCurrent && rest.length > 0) {
+      const latest = rest.reduce((a, b) =>
+        b.versionCode > a.versionCode ? b : a,
+      )
+      setVersions(rest.map((v) => ({ ...v, isCurrent: v.id === latest.id })))
+    } else {
+      setVersions(rest)
+    }
   }
 
   return (
@@ -323,7 +312,7 @@ export default function AppVersionsPage() {
             onChange={(e) => {
               const file = e.target.files?.[0]
               if (file) {
-                handleUploadApk(file)
+                handleSelectApk(file)
               }
               e.target.value = ''
             }}
@@ -476,49 +465,18 @@ export default function AppVersionsPage() {
             <SheetHeader>
               <SheetTitle>Новая версия</SheetTitle>
               <SheetDescription>
-                Заполните данные версии после загрузки APK
+                Версия и код будут прочитаны из APK. Версия публикуется только
+                если её код выше всех загруженных
               </SheetDescription>
             </SheetHeader>
             <form onSubmit={handleCreate} className="mt-6 space-y-4 px-4">
               <FieldGroup>
                 <Field>
                   <FieldLabel>APK файл</FieldLabel>
-                  <Input value={uploadedFilename ?? ''} disabled readOnly />
+                  <Input value={pendingFile?.name ?? ''} disabled readOnly />
                   <p className="text-xs text-muted-foreground">
-                    Файл загружен на сервер
-                    {uploadedSize ? ` (${formatBytes(uploadedSize)})` : ''}
+                    {pendingFile ? formatBytes(pendingFile.size) : ''}
                   </p>
-                </Field>
-                <Field>
-                  <FieldLabel>Версия *</FieldLabel>
-                  <Input
-                    placeholder="1.4.0"
-                    value={formData.version}
-                    onChange={(e) => handleChange('version', e.target.value)}
-                    aria-invalid={!!errors.version}
-                  />
-                  {errors.version && (
-                    <FieldMessage variant="error">
-                      {errors.version}
-                    </FieldMessage>
-                  )}
-                </Field>
-                <Field>
-                  <FieldLabel>Version code *</FieldLabel>
-                  <Input
-                    type="number"
-                    placeholder="14"
-                    value={formData.versionCode}
-                    onChange={(e) =>
-                      handleChange('versionCode', e.target.value)
-                    }
-                    aria-invalid={!!errors.versionCode}
-                  />
-                  {errors.versionCode && (
-                    <FieldMessage variant="error">
-                      {errors.versionCode}
-                    </FieldMessage>
-                  )}
                 </Field>
                 <Field>
                   <FieldLabel>Changelog</FieldLabel>
@@ -568,7 +526,7 @@ export default function AppVersionsPage() {
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting && <Spinner className="mr-2" />}
-                  Создать
+                  Опубликовать
                 </Button>
               </SheetFooter>
             </form>
@@ -583,20 +541,6 @@ export default function AppVersionsPage() {
             </SheetHeader>
             <form onSubmit={handleEdit} className="mt-6 space-y-4 px-4">
               <FieldGroup>
-                <Field>
-                  <FieldLabel>Версия *</FieldLabel>
-                  <Input
-                    placeholder="1.4.0"
-                    value={formData.version}
-                    onChange={(e) => handleChange('version', e.target.value)}
-                    aria-invalid={!!errors.version}
-                  />
-                  {errors.version && (
-                    <FieldMessage variant="error">
-                      {errors.version}
-                    </FieldMessage>
-                  )}
-                </Field>
                 <Field>
                   <FieldLabel>Changelog</FieldLabel>
                   <Input
@@ -656,6 +600,11 @@ export default function AppVersionsPage() {
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
           title={`Удалить версию "${selectedVersion?.version}"?`}
+          description={
+            selectedVersion?.isCurrent
+              ? 'Это текущая версия. После удаления текущей станет версия с наибольшим кодом. APK-файл будет удалён с сервера.'
+              : 'APK-файл будет удалён с сервера. Это действие нельзя отменить.'
+          }
           onConfirm={handleConfirmDelete}
         />
       </main>

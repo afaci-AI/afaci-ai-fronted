@@ -1,7 +1,6 @@
 export { appVersionsApi } from './api'
 export type {
   AppVersionAdmin,
-  AppVersionCreateData,
   AppVersionUpdateData,
-  UploadApkResponse,
+  UploadApkOptions,
 } from './api'
