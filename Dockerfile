@@ -1,9 +1,12 @@
+# syntax=docker/dockerfile:1.7
 ARG REGISTRY_PROXY
 
 FROM ${REGISTRY_PROXY}/library/node:20-alpine AS deps
 WORKDIR /app
+# Слой зависимостей зависит только от lock-файла; npm-кеш — в cache mount.
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --prefer-offline --no-audit --no-fund
 
 FROM ${REGISTRY_PROXY}/library/node:20-alpine AS builder
 WORKDIR /app
@@ -12,7 +15,9 @@ COPY . .
 ARG BACKEND_URL=http://backend:8000
 ENV BACKEND_URL=$BACKEND_URL
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+# Инкрементальный кеш Next.js между сборками (в образ не попадает).
+RUN --mount=type=cache,target=/app/.next/cache \
+    npm run build
 
 FROM ${REGISTRY_PROXY}/library/node:20-alpine AS runner
 WORKDIR /app
