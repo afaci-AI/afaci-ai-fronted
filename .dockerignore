@@ -11,3 +11,5 @@ README.md
 Dockerfile
 .dockerignore
 pnpm-lock.yaml
+*.tsbuildinfo
+coverage/
