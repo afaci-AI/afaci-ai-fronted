@@ -29,7 +29,6 @@ jobs:
       - run: npx prettier --check .
       - run: npx tsc --noEmit
 
-
   build:
     name: build
     runs-on: ubuntu-latest
