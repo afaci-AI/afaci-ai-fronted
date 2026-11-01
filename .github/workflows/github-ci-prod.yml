@@ -36,13 +36,19 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
-
+  
       - name: Extract Tag Name
-        id: vars
         run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-
-      - run: docker build -f Dockerfile.prod -t afaci-ai-frontend:${{ env.TAG_NAME }} -t afaci-ai-frontend:prod .
-
+  
+      - name: Build Docker image
+        env:
+          DOCKER_BUILDKIT: "1"
+        run: |
+          docker build \
+            -f Dockerfile.prod \
+            -t afaci-ai-frontend:${{ env.TAG_NAME }} \
+            -t afaci-ai-frontend:prod \
+            .
 
   deploy:
     runs-on: afaci-runner-01
