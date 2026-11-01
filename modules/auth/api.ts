@@ -15,11 +15,6 @@ export interface AuthResponse {
 }
 
 export const authApi = {
-  register: (data: { email: string; name: string; password: string }) =>
-    fetchApi<AuthResponse>('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
   login: (data: { email: string; password: string }) =>
     fetchApi<AuthResponse>('/auth/login', {
       method: 'POST',

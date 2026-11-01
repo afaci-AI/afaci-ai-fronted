@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { UserPlus, MoreHorizontal, Pencil, Power, Trash2 } from 'lucide-react'
+import { UserPlus, MoreHorizontal, Pencil, Power } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Card,
@@ -42,7 +42,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
@@ -53,7 +52,6 @@ import {
 } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 import { AppHeader } from '@/components/app-header'
-import { DeleteDialog } from '@/components/delete-dialog'
 import { useAuth } from '@/lib/auth-context'
 import type { UserRole, UserStatus } from '@/lib/types'
 import { hasPermission } from '@/lib/types'
@@ -133,7 +131,6 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [permanentDeleteOpen, setPermanentDeleteOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<UserFormData>(emptyForm)
@@ -303,24 +300,6 @@ export default function UsersPage() {
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Произошла ошибка')
-    }
-  }
-
-  const handleDeletePermanently = (user: AdminUser) => {
-    setSelectedUser(user)
-    setPermanentDeleteOpen(true)
-  }
-
-  const handleConfirmDeletePermanently = async () => {
-    if (!selectedUser) return
-    try {
-      await usersApi.deletePermanently(selectedUser.id)
-      setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id))
-      toast.success('Пользователь и все его рецептуры удалены')
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Произошла ошибка')
-    } finally {
-      setSelectedUser(null)
     }
   }
 
@@ -495,15 +474,6 @@ export default function UsersPage() {
                                   ? 'Деактивировать'
                                   : 'Активировать'}
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => handleDeletePermanently(user)}
-                                className="text-destructive"
-                                disabled={user.id === currentUser?.id}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Удалить безвозвратно
-                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -671,14 +641,6 @@ export default function UsersPage() {
             </form>
           </SheetContent>
         </Sheet>
-
-        <DeleteDialog
-          open={permanentDeleteOpen}
-          onOpenChange={setPermanentDeleteOpen}
-          title={`Удалить пользователя "${selectedUser?.name}" безвозвратно?`}
-          description="Будут удалены сам пользователь, все его группы и сохранённые рецептуры. Это действие нельзя отменить."
-          onConfirm={handleConfirmDeletePermanently}
-        />
       </main>
     </>
   )
