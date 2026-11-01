@@ -48,16 +48,43 @@ export interface UploadApkOptions {
 
 export const appVersionsApi = {
   // versionName/versionCode backend читает из самого APK и публикует версию.
-  uploadApk: (file: File, options: UploadApkOptions) =>
-    uploadFile<AppVersionAdmin>('/admin/app-versions/upload-apk', file, {
-      forceUpdate: String(options.forceUpdate),
-      ...(options.changelog ? { changelog: options.changelog } : {}),
-      ...(options.minSupportedVersionCode != null
-        ? {
-            minSupportedVersionCode: String(options.minSupportedVersionCode),
-          }
-        : {}),
-    }),
+  uploadApk: async (
+    file: File,
+    options: UploadApkOptions,
+  ): Promise<AppVersionAdmin> => {
+    const result = await uploadFile<AppVersionAdmin>(
+      '/admin/app-versions/upload-apk',
+      file,
+      {
+        forceUpdate: String(options.forceUpdate),
+        ...(options.changelog ? { changelog: options.changelog } : {}),
+        ...(options.minSupportedVersionCode != null
+          ? {
+              minSupportedVersionCode: String(options.minSupportedVersionCode),
+            }
+          : {}),
+      },
+    )
+    if (
+      !result ||
+      typeof result.id !== 'string' ||
+      typeof result.version !== 'string' ||
+      !result.version.trim() ||
+      !Number.isInteger(result.versionCode) ||
+      result.versionCode <= 0 ||
+      typeof result.isCurrent !== 'boolean' ||
+      typeof result.forceUpdate !== 'boolean' ||
+      typeof result.apkUrl !== 'string' ||
+      typeof result.apkFilename !== 'string' ||
+      typeof result.publishedAt !== 'string' ||
+      Number.isNaN(Date.parse(result.publishedAt))
+    ) {
+      throw new Error(
+        'Сервер не подтвердил публикацию версии. Обновите backend и повторите загрузку APK.',
+      )
+    }
+    return result
+  },
   list: () => fetchApi<AppVersionAdmin[]>('/admin/app-versions'),
   update: (id: string, data: AppVersionUpdateData) =>
     fetchApi<AppVersionAdmin>(`/admin/app-versions/${id}`, {
