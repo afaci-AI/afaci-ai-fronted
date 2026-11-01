@@ -1,9 +1,14 @@
 import { fetchApi, getToken } from '@/shared/api/client'
 
-async function uploadFile<T>(endpoint: string, file: File): Promise<T> {
+async function uploadFile<T>(
+  endpoint: string,
+  file: File,
+  fields: Record<string, string> = {},
+): Promise<T> {
   const token = getToken()
   const form = new FormData()
   form.append('file', file)
+  for (const [key, value] of Object.entries(fields)) form.append(key, value)
   const res = await fetch(`/api/v1${endpoint}`, {
     method: 'POST',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -29,38 +34,31 @@ export interface AppVersionAdmin {
   publishedAt: string
 }
 
-export interface AppVersionCreateData {
-  version: string
-  versionCode: number
-  apkFilename: string
-  changelog?: string | null
-  forceUpdate?: boolean
-  minSupportedVersionCode?: number | null
-  isCurrent?: boolean
-}
-
 export interface AppVersionUpdateData {
-  version?: string
   changelog?: string | null
   forceUpdate?: boolean
   minSupportedVersionCode?: number | null
 }
 
-export interface UploadApkResponse {
-  filename: string
-  url: string
-  size: number
+export interface UploadApkOptions {
+  forceUpdate: boolean
+  changelog?: string | null
+  minSupportedVersionCode?: number | null
 }
 
 export const appVersionsApi = {
-  uploadApk: (file: File) =>
-    uploadFile<UploadApkResponse>('/admin/app-versions/upload-apk', file),
-  list: () => fetchApi<AppVersionAdmin[]>('/admin/app-versions'),
-  create: (data: AppVersionCreateData) =>
-    fetchApi<AppVersionAdmin>('/admin/app-versions', {
-      method: 'POST',
-      body: JSON.stringify(data),
+  // versionName/versionCode backend читает из самого APK и публикует версию.
+  uploadApk: (file: File, options: UploadApkOptions) =>
+    uploadFile<AppVersionAdmin>('/admin/app-versions/upload-apk', file, {
+      forceUpdate: String(options.forceUpdate),
+      ...(options.changelog ? { changelog: options.changelog } : {}),
+      ...(options.minSupportedVersionCode != null
+        ? {
+            minSupportedVersionCode: String(options.minSupportedVersionCode),
+          }
+        : {}),
     }),
+  list: () => fetchApi<AppVersionAdmin[]>('/admin/app-versions'),
   update: (id: string, data: AppVersionUpdateData) =>
     fetchApi<AppVersionAdmin>(`/admin/app-versions/${id}`, {
       method: 'PATCH',

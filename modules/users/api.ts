@@ -52,8 +52,4 @@ export const usersApi = {
     }),
   deactivate: (id: string) =>
     fetchApi<{ status: string }>(`/users/${id}`, { method: 'DELETE' }),
-  deletePermanently: (id: string) =>
-    fetchApi<{ status: string }>(`/users/${id}/permanent`, {
-      method: 'DELETE',
-    }),
 }
