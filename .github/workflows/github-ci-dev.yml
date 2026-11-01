@@ -10,7 +10,7 @@ permissions:
 jobs:  
   frontend-analysis:
     name: Lint & Type Check
-    runs-on: ubuntu-latest
+    runs-on: afaci-runner-01
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -26,49 +26,5 @@ jobs:
       - run: npx eslint .
       - run: npx prettier --check .
       - run: npx tsc --noEmit
-      
-  build:
-    name: build
-    runs-on: afaci-runner-01
-    needs: frontend-analysis
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-
-      - run: echo "${{ secrets.NEXUS_PASSWORD }}" | docker login ${{ secrets.NEXUS_REGISTRY_PROXY }} -u "${{ secrets.NEXUS_USER }}" --password-stdin
-      
-      - run: |
-            docker build \
-              --build-arg REGISTRY_PROXY=${{ secrets.NEXUS_REGISTRY_PROXY }} \
-              -t ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.IMAGE_NAME }}:${{ github.sha }} .
-      
-
-  image-push:
-    runs-on: afaci-runner-01
-    needs: build
-    steps:
-
-      - run: echo "${{ secrets.NEXUS_PASSWORD }}" | docker login ${{ secrets.NEXUS_REGISTRY }} -u "${{ secrets.NEXUS_USER }}" --password-stdin
-      - run: docker push ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.IMAGE_NAME }}:${{ github.sha }}
-
-      - name: Log out from Nexus
-        if: always()
-        run: docker logout ${{ secrets.NEXUS_REGISTRY }}
-
-  deploy:
-    runs-on: afaci-runner-01
-    needs: image-push
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v5
-
-      - run: echo "${{ secrets.NEXUS_PASSWORD }}" | docker login ${{ secrets.NEXUS_REGISTRY }} -u "${{ secrets.NEXUS_USER }}" --password-stdin
-
-      - name: Deploy to devops-server (external daemon)
-        env:
-          DOCKER_HOST: ${{ secrets.DOCKER_HOST }}
-          BACKEND_URL: ${{ secrets.BACKEND_URL }}
-          FRONTEND_IMAGE: ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.IMAGE_NAME }}:${{ github.sha }}
-        run: docker compose -f - up -d --pull always < docker-compose.yml  
     
     
