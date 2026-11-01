@@ -116,7 +116,6 @@ function LoginInner() {
             </Button>
           </form>
 
-          {/* Самостоятельной регистрации нет — аккаунты только по приглашению/через админа. */}
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Нет аккаунта? Обратитесь к администратору.
           </p>

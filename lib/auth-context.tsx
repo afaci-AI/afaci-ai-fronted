@@ -16,7 +16,6 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   login: (email: string, password: string) => Promise<boolean>
-  register: (email: string, name: string, password: string) => Promise<boolean>
   logout: () => void
 }
 
@@ -98,15 +97,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [persist],
   )
 
-  const register = useCallback(
-    async (email: string, name: string, password: string): Promise<boolean> => {
-      const res = await authApi.register({ email, name, password })
-      persist(res.access_token, res.user)
-      return true
-    },
-    [persist],
-  )
-
   const logout = useCallback(() => {
     setToken(null)
     if (typeof window !== 'undefined') window.localStorage.removeItem(USER_KEY)
@@ -130,7 +120,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         isLoading,
         login,
-        register,
         logout,
       }}
     >
