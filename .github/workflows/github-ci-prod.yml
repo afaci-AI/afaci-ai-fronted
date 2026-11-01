@@ -50,25 +50,60 @@ jobs:
             -t afaci-ai-frontend:prod \
             .
 
+
   deploy:
+    name: deploy
     runs-on: afaci-runner-01
     needs: build
+  
     steps:
       - name: Execute remote SSH commands
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          envs: APP_PATH
-          script: |
-            cd $APP_PATH
-            git fetch --tags
-            git checkout tags/${{ github.ref_name }}
-            docker compose -f docker-compose.prod.yml up --build -d
         env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
           APP_PATH: ${{ vars.APP_PATH }}
+          TAG_NAME: ${{ github.ref_name }}
+  
+        run: |
+          set -euo pipefail
+  
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+  
+          KEY_FILE=$(mktemp ~/.ssh/deploy_key.XXXXXX)
+          trap 'rm -f "$KEY_FILE"' EXIT
+  
+          printf '%s\n' "$SSH_KEY" > "$KEY_FILE"
+          chmod 600 "$KEY_FILE"
+  
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+  
+          SSH_PORT="${SSH_PORT:-22}"
+  
+          REMOTE_COMMAND="bash -se -- $(printf '%q' "$APP_PATH") $(printf '%q' "$TAG_NAME")"
+  
+          ssh \
+            -i "$KEY_FILE" \
+            -p "$SSH_PORT" \
+            -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" \
+            "$REMOTE_COMMAND" <<'REMOTE'
+          set -euo pipefail
+  
+          APP_PATH="$1"
+          TAG_NAME="$2"
+  
+          cd "$APP_PATH"
+  
+          git fetch --tags
+          git checkout --detach "refs/tags/$TAG_NAME"
+  
+          docker compose -f docker-compose.prod.yml up --build -d
+          REMOTE
 
 
   create-release:
