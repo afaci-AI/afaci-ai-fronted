@@ -58,6 +58,7 @@ jobs:
   
     steps:
       - name: Execute remote SSH commands
+        shell: bash
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
@@ -70,26 +71,37 @@ jobs:
         run: |
           set -euo pipefail
   
+          : "${SSH_HOST:?SSH_HOST is required}"
+          : "${SSH_USER:?SSH_USER is required}"
+          : "${SSH_KEY:?SSH_KEY is required}"
+          : "${SSH_KNOWN_HOSTS:?SSH_KNOWN_HOSTS is required}"
+          : "${APP_PATH:?APP_PATH is required}"
+          : "${TAG_NAME:?TAG_NAME is required}"
+  
+          SSH_PORT="${SSH_PORT:-22}"
+  
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
   
-          KEY_FILE=$(mktemp ~/.ssh/deploy_key.XXXXXX)
-          trap 'rm -f "$KEY_FILE"' EXIT
+          KEY_FILE=$(mktemp)
+          KNOWN_HOSTS_FILE=$(mktemp)
+  
+          trap 'rm -f "$KEY_FILE" "$KNOWN_HOSTS_FILE"' EXIT
   
           printf '%s\n' "$SSH_KEY" > "$KEY_FILE"
           chmod 600 "$KEY_FILE"
   
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-  
-          SSH_PORT="${SSH_PORT:-22}"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$KNOWN_HOSTS_FILE"
+          chmod 600 "$KNOWN_HOSTS_FILE"
   
           REMOTE_COMMAND="bash -se -- $(printf '%q' "$APP_PATH") $(printf '%q' "$TAG_NAME")"
   
           ssh \
             -i "$KEY_FILE" \
             -p "$SSH_PORT" \
+            -o BatchMode=yes \
             -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$KNOWN_HOSTS_FILE" \
             "$SSH_USER@$SSH_HOST" \
             "$REMOTE_COMMAND" <<'REMOTE'
           set -euo pipefail
@@ -99,10 +111,19 @@ jobs:
   
           cd "$APP_PATH"
   
+          echo "Fetching Git tags..."
           git fetch --tags
+  
+          echo "Checking deployment tag..."
+          git rev-parse --verify "refs/tags/$TAG_NAME^{commit}"
+  
+          echo "Checking out tag..."
           git checkout --detach "refs/tags/$TAG_NAME"
   
+          echo "Deploying containers..."
           docker compose -f docker-compose.prod.yml up --build -d
+  
+          echo "Deployment completed."
           REMOTE
 
 
