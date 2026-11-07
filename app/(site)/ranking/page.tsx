@@ -248,7 +248,7 @@ export default function RankingPage() {
                       </div>
                       <div className="text-muted-foreground mt-0.5 text-xs">
                         БЦ {nf(r.metrics?.bc)} · КРАС {nf(r.metrics?.kras)} · U{' '}
-                        {nf(r.metrics?.V, 2)} · G {nf(r.metrics?.G, 2)}
+                        {nf(r.metrics?.U, 2)} · G {nf(r.metrics?.G, 2)}
                       </div>
                     </div>
                   </label>
@@ -284,7 +284,7 @@ export default function RankingPage() {
                       />
                       <BigMetric label="БЦ, %" value={nf(winner.bc)} />
                       <BigMetric label="КРАС, %" value={nf(winner.kras)} />
-                      <BigMetric label="U" value={nf(winner.V, 2)} />
+                      <BigMetric label="U" value={nf(winner.U, 2)} />
                       <BigMetric label="G" value={nf(winner.G, 2)} />
                     </div>
                   </div>
@@ -381,7 +381,7 @@ export default function RankingPage() {
                             {nf(x.kras)}
                           </TableCell>
                           <TableCell className="text-right">
-                            {nf(x.V, 2)}
+                            {nf(x.U, 2)}
                           </TableCell>
                           <TableCell className="text-right">
                             {nf(x.G, 2)}
