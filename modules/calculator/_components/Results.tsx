@@ -43,44 +43,54 @@ function VerdictCard({ verdict }: { verdict: ComputeVerdict }) {
     string,
     { card: string; icon: string; badge: string; label: string }
   > = {
-    good: {
+    complete: {
       card: 'border-success/40 bg-success/5',
       icon: 'text-success',
       badge: 'bg-success/15 text-success',
-      label: 'Высокое качество',
+      label: 'Полноценный по эталону',
     },
-    moderate: {
+    incomplete: {
       card: 'border-warning/40 bg-warning/5',
       icon: 'text-warning-foreground',
       badge: 'bg-warning/20 text-warning-foreground',
-      label: 'Удовлетворительно',
-    },
-    poor: {
-      card: 'border-destructive/40 bg-destructive/5',
-      icon: 'text-destructive',
-      badge: 'bg-destructive/15 text-destructive',
-      label: 'Низкое качество',
+      label: 'Неполноценный по эталону',
     },
   }
-  const s = styles[verdict.level] ?? styles.moderate
+  // Незнакомый level (новая версия backend) показываем нейтрально.
+  const s = styles[verdict.level] ?? {
+    card: 'border-border bg-muted/30',
+    icon: 'text-muted-foreground',
+    badge: 'bg-muted text-muted-foreground',
+    label: '',
+  }
   return (
     <Card className={cn('border', s.card)}>
       <CardHeader>
         <CardTitle className="flex flex-wrap items-center gap-2 text-lg">
           <Lightbulb className={cn('h-5 w-5', s.icon)} />
           Заключение: {verdict.headline}
-          <span
-            className={cn(
-              'rounded-full px-2 py-0.5 text-xs font-medium',
-              s.badge,
-            )}
-          >
-            {s.label}
-          </span>
+          {s.label ? (
+            <span
+              className={cn(
+                'rounded-full px-2 py-0.5 text-xs font-medium',
+                s.badge,
+              )}
+            >
+              {s.label}
+            </span>
+          ) : null}
         </CardTitle>
         <CardDescription>
-          Автоматическая оценка качества белка по показателям расчёта
+          Оценка по аминокислотному составу в сравнении с выбранным эталоном
         </CardDescription>
+        {verdict.experimental_note ? (
+          <p
+            role="note"
+            className="rounded-md border border-dashed border-warning/60 bg-warning/10 px-3 py-2 text-xs text-warning-foreground"
+          >
+            {verdict.experimental_note}
+          </p>
+        ) : null}
       </CardHeader>
       <CardContent>
         <ul className="space-y-2">
