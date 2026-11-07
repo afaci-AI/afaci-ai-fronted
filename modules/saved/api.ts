@@ -31,7 +31,7 @@ export interface SavedGroup {
 export interface RecipeMetrics {
   bc?: number | null
   kras?: number | null
-  V?: number | null
+  U?: number | null
   G?: number | null
 }
 
@@ -56,7 +56,7 @@ export interface RankedRecipe {
   composite: number
   bc: number
   kras: number
-  V: number
+  U: number
   G: number
 }
 
@@ -100,7 +100,7 @@ export const savedApi = {
 
   ranking: (body: {
     recipe_ids: string[]
-    weights?: { bc: number; kras: number; v: number; g: number }
+    weights?: { bc: number; kras: number; u: number; g: number }
   }) =>
     fetchApi<RankingResult>('/saved/ranking', {
       method: 'POST',

@@ -263,7 +263,7 @@ export default function SavedRecipesPage() {
                       <div className="grid grid-cols-4 gap-2 text-center">
                         <Metric label="БЦ, %" value={nf(r.metrics?.bc)} />
                         <Metric label="КРАС, %" value={nf(r.metrics?.kras)} />
-                        <Metric label="V" value={nf(r.metrics?.V, 2)} />
+                        <Metric label="U" value={nf(r.metrics?.U, 2)} />
                         <Metric label="G" value={nf(r.metrics?.G, 2)} />
                       </div>
 

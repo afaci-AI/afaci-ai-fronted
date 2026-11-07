@@ -202,8 +202,8 @@ export function Results({ result }: { result: ComputeResult }) {
           accent="good"
         />
         <StatCard
-          label="Коэф. утилитарности V"
-          value={nf(q.V, 2)}
+          label="Коэф. утилитарности U"
+          value={nf(q.U, 2)}
           sub={`Избыточность G = ${nf(q.G, 2)} г/100 г белка`}
           accent="primary"
         />
@@ -523,8 +523,8 @@ export function Results({ result }: { result: ComputeResult }) {
               hint="БЦ = 100 − КРАС. Доля белка, усваиваемого организмом."
             />
             <QualityCard
-              label="Коэф. утилитарности V"
-              value={nf(q.V, 2)}
+              label="Коэф. утилитарности U"
+              value={nf(q.U, 2)}
               hint="Сбалансированность НАК относительно лимитирующей (0…1). Ближе к 1 — лучше."
             />
             <QualityCard

@@ -84,7 +84,7 @@ export interface ComputeResult {
     fiber: number
     protein_fat_ratio: number
   }
-  quality: { bc: number; kras: number; V: number; G: number }
+  quality: { bc: number; kras: number; U: number; G: number }
   amino_acids: AminoAcidResult[]
   energy_kcal: number
   c_min: { name: string; score: number } | null
