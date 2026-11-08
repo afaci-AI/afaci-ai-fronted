@@ -37,6 +37,7 @@ const baseNavItems = [
   { label: 'Главная', href: '/' },
   { label: 'База данных', href: '/database' },
   { label: 'Калькулятор', href: '/calculator' },
+  { label: 'Источники', href: '/sources' },
   { label: 'О нас', href: '/about' },
 ]
 

@@ -1,5 +1,6 @@
 import { fetchApi } from '@/shared/api/client'
 import type { SavedRecipeDetail } from '@/modules/saved/api'
+import type { DailyNorms } from '@/modules/norms'
 
 export interface CalcItem {
   product_id: string
@@ -92,6 +93,8 @@ export interface ComputeResult {
   limiting: string[]
   warnings?: string[]
   verdict?: ComputeVerdict | null
+  /** Суточные нормы и доля от нормы для 100 г рецептуры; считаются на backend. */
+  daily_norms?: DailyNorms | null
   recipe: ComputeRecipeItem[]
   sum_g: number
   reference: { name: string }
