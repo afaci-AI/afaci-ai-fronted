@@ -56,6 +56,12 @@ function VerdictCard({ verdict }: { verdict: ComputeVerdict }) {
       label: 'Неполноценный по эталону',
     },
   }
+  styles.unconfirmed = {
+    card: 'border-border bg-muted/30',
+    icon: 'text-muted-foreground',
+    badge: 'bg-muted text-muted-foreground',
+    label: 'Не подтверждено: мало данных',
+  }
   // Незнакомый level (новая версия backend) показываем нейтрально.
   const s = styles[verdict.level] ?? {
     card: 'border-border bg-muted/30',
@@ -106,6 +112,57 @@ function VerdictCard({ verdict }: { verdict: ComputeVerdict }) {
             </li>
           ))}
         </ul>
+        {verdict.criterion ||
+        verdict.explanation?.length ||
+        verdict.reference?.source ? (
+          <details className="mt-4 rounded-md border px-3 py-2 text-sm">
+            <summary className="cursor-pointer font-medium">
+              Почему такой вывод
+            </summary>
+            <div className="mt-3 space-y-3">
+              {verdict.criterion ? (
+                <div>
+                  <p className="font-medium">Правило сравнения</p>
+                  <p className="text-muted-foreground">{verdict.criterion}</p>
+                </div>
+              ) : null}
+              {verdict.reference?.source ? (
+                <div>
+                  <p className="font-medium">Источник эталона</p>
+                  <p>{verdict.reference.source.title}</p>
+                  <p className="text-muted-foreground">
+                    {[
+                      verdict.reference.source.authors,
+                      verdict.reference.source.year,
+                      verdict.reference.source.location,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                  {verdict.reference.source.url ? (
+                    <a
+                      href={verdict.reference.source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline"
+                    >
+                      Открыть источник
+                    </a>
+                  ) : null}
+                </div>
+              ) : null}
+              {verdict.explanation?.map((row) => (
+                <div key={row.code}>
+                  <p className="font-medium">
+                    {row.code} — {row.title}: {row.value}
+                    {row.unit ? ` ${row.unit}` : ''}
+                  </p>
+                  <p className="text-muted-foreground">{row.text}</p>
+                </div>
+              ))}
+            </div>
+          </details>
+        ) : null}
       </CardContent>
     </Card>
   )
