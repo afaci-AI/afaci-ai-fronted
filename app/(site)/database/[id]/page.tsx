@@ -22,6 +22,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { ProductNutrientCharts } from '@/components/product-nutrient-charts'
+import { DailyNormsCard, normsApi } from '@/modules/norms'
+import type { DailyNorms } from '@/modules/norms'
 import {
   productsApi,
   nutrientsApi,
@@ -58,6 +60,7 @@ export default function PublicProductPage({
   const [nutrientNames, setNutrientNames] = useState<NutrientName[]>([])
   const [nutrientTypes, setNutrientTypes] = useState<NutrientType[]>([])
   const [units, setUnits] = useState<Unit[]>([])
+  const [norms, setNorms] = useState<DailyNorms | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -84,6 +87,11 @@ export default function PublicProductPage({
         setNutrientNames(names)
         setNutrientTypes(types)
         setUnits(uns)
+        // Нормы дополняют карточку: их сбой не мешает показу самого продукта.
+        normsApi
+          .product(id)
+          .then(setNorms)
+          .catch(() => setNorms(null))
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Ошибка загрузки')
       } finally {
@@ -212,6 +220,8 @@ export default function PublicProductPage({
             units={units}
           />
         )}
+
+        {norms && <DailyNormsCard data={norms} subject="продукта" />}
       </div>
     </div>
   )

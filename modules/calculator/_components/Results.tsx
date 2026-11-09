@@ -35,6 +35,7 @@ import {
 import { cn } from '@/lib/utils'
 import { nf, COL } from '../_lib/utils'
 import type { ComputeResult, ComputeVerdict } from '../api'
+import { DailyNormsCard } from '@/modules/norms'
 import { StatCard } from './StatCard'
 import { FormulaHint } from './FormulaHint'
 
@@ -221,6 +222,10 @@ export function Results({ result }: { result: ComputeResult }) {
       )}
 
       {result.verdict && <VerdictCard verdict={result.verdict} />}
+
+      {result.daily_norms && (
+        <DailyNormsCard data={result.daily_norms} subject="рецептуры" />
+      )}
 
       <Card>
         <CardHeader>

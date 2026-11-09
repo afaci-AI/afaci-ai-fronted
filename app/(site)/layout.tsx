@@ -23,6 +23,9 @@ export default function SiteLayout({
             <Link href="/calculator" className="hover:text-foreground">
               Калькулятор
             </Link>
+            <Link href="/sources" className="hover:text-foreground">
+              Источники
+            </Link>
             <Link href="/about" className="hover:text-foreground">
               О нас
             </Link>
