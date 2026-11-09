@@ -3,22 +3,17 @@
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Database, Eye, EyeOff } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/shared/ui/button'
+import { Input } from '@/shared/ui/input'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import {
-  FieldGroup,
-  Field,
-  FieldLabel,
-  FieldMessage,
-} from '@/components/ui/field'
-import { useAuth } from '@/lib/auth-context'
+} from '@/shared/ui/card'
+import { FieldGroup, Field, FieldLabel, FieldMessage } from '@/shared/ui/field'
+import { useAuth } from '@/features/auth'
 
 function LoginInner() {
   const [email, setEmail] = useState('')

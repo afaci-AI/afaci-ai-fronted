@@ -9,16 +9,17 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { AppHeader } from '@/components/app-header'
-import { DataTable, type Column, type Filter } from '@/components/data-table'
-import { DeleteDialog } from '@/components/delete-dialog'
-import { useAuth } from '@/lib/auth-context'
-import { hasPermission } from '@/lib/types'
-import { productsApi, categoriesApi, regionsApi } from '@/lib/api'
-import type { Product, Category, Region } from '@/lib/types'
+} from '@/shared/ui/card'
+import { Button } from '@/shared/ui/button'
+import { Badge } from '@/shared/ui/badge'
+import { AppHeader } from '@/app/_shell/app-header'
+import { DataTable, type Column, type Filter } from '@/shared/ui/data-table'
+import { DeleteDialog } from '@/shared/ui/delete-dialog'
+import { useAuth } from '@/features/auth'
+import { hasPermission } from '@/shared/api/types'
+import { productsApi } from '@/features/products'
+import { categoriesApi, regionsApi } from '@/features/catalog'
+import type { Product, Category, Region } from '@/shared/api/types'
 
 export default function ProductsPage() {
   const { user } = useAuth()

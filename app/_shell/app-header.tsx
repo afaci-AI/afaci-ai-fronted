@@ -1,0 +1,122 @@
+'use client'
+
+import React from 'react'
+import { useRouter } from 'next/navigation'
+import { LogOut, User, ChevronDown } from 'lucide-react'
+import { SidebarTrigger } from '@/shared/ui/sidebar'
+import { Button } from '@/shared/ui/button'
+import { Badge } from '@/shared/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu'
+import { Separator } from '@/shared/ui/separator'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/shared/ui/breadcrumb'
+import { useAuth } from '@/features/auth'
+import type { UserRole } from '@/shared/api/types'
+
+interface AppHeaderProps {
+  breadcrumbs?: { label: string; href?: string }[]
+}
+
+const roleLabels: Record<UserRole, string> = {
+  admin: 'Администратор',
+  editor: 'Редактор',
+  viewer: 'Аналитик',
+}
+
+const roleBadgeVariants: Record<UserRole, 'default' | 'secondary' | 'outline'> =
+  {
+    admin: 'default',
+    editor: 'secondary',
+    viewer: 'outline',
+  }
+
+export function AppHeader({ breadcrumbs }: AppHeaderProps) {
+  const { user, logout } = useAuth()
+  const router = useRouter()
+
+  const handleLogout = () => {
+    logout()
+    router.push('/login')
+  }
+
+  return (
+    <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b border-border bg-card px-4">
+      <SidebarTrigger className="-ml-1" />
+      <Separator orientation="vertical" className="h-6" />
+
+      {breadcrumbs && breadcrumbs.length > 0 && (
+        <Breadcrumb>
+          <BreadcrumbList>
+            {breadcrumbs.map((crumb, index) => (
+              <React.Fragment key={index}>
+                {index > 0 && <BreadcrumbSeparator />}
+                <BreadcrumbItem>
+                  {crumb.href ? (
+                    <BreadcrumbLink href={crumb.href}>
+                      {crumb.label}
+                    </BreadcrumbLink>
+                  ) : (
+                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+              </React.Fragment>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
+      )}
+
+      <div className="ml-auto flex items-center gap-3">
+        {user && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center gap-2 px-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="hidden flex-col items-start text-left md:flex">
+                  <span className="text-sm font-medium">{user.name}</span>
+                  <Badge
+                    variant={roleBadgeVariants[user.role]}
+                    className="text-xs"
+                  >
+                    {roleLabels[user.role]}
+                  </Badge>
+                </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-medium">{user.name}</p>
+                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-destructive"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Выйти
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
+    </header>
+  )
+}

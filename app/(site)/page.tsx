@@ -9,14 +9,14 @@ import {
   Bookmark,
   Sparkles,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/shared/ui/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from '@/shared/ui/card'
 
 // Основные инструменты приложения (требуют входа). Карточки кликабельны.
 const tools = [

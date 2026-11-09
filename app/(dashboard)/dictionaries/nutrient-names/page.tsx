@@ -8,20 +8,17 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { AppHeader } from '@/components/app-header'
-import { DataTable, type Column, type Filter } from '@/components/data-table'
-import {
-  DictionaryFormDrawer,
-  type FormField,
-} from '@/components/dictionary-form-drawer'
-import { DeleteDialog } from '@/components/delete-dialog'
-import { useAuth } from '@/lib/auth-context'
-import { hasPermission } from '@/lib/types'
-import { nutrientNamesApi, nutrientTypesApi } from '@/lib/api'
-import type { NutrientName, NutrientType } from '@/lib/types'
+} from '@/shared/ui/card'
+import { Button } from '@/shared/ui/button'
+import { Badge } from '@/shared/ui/badge'
+import { AppHeader } from '@/app/_shell/app-header'
+import { DataTable, type Column, type Filter } from '@/shared/ui/data-table'
+import { DictionaryFormDrawer, type FormField } from '@/features/catalog'
+import { DeleteDialog } from '@/shared/ui/delete-dialog'
+import { useAuth } from '@/features/auth'
+import { hasPermission } from '@/shared/api/types'
+import { nutrientNamesApi, nutrientTypesApi } from '@/features/catalog'
+import type { NutrientName, NutrientType } from '@/shared/api/types'
 
 export default function NutrientNamesPage() {
   const { user } = useAuth()

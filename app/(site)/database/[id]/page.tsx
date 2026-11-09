@@ -18,22 +18,21 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { ProductNutrientCharts } from '@/components/product-nutrient-charts'
-import { DailyNormsCard, normsApi } from '@/modules/norms'
-import type { DailyNorms } from '@/modules/norms'
+} from '@/shared/ui/card'
+import { Button } from '@/shared/ui/button'
+import { Spinner } from '@/shared/ui/spinner'
+import { ProductNutrientCharts } from '@/features/products'
+import { DailyNormsCard, normsApi } from '@/features/norms'
+import type { DailyNorms } from '@/features/norms'
+import { productsApi, nutrientsApi } from '@/features/products'
 import {
-  productsApi,
-  nutrientsApi,
   categoriesApi,
   subcategoriesApi,
   regionsApi,
   nutrientNamesApi,
   nutrientTypesApi,
   unitsApi,
-} from '@/lib/api'
+} from '@/features/catalog'
 import type {
   Product,
   Category,
@@ -43,7 +42,7 @@ import type {
   NutrientName,
   NutrientType,
   Unit,
-} from '@/lib/types'
+} from '@/shared/api/types'
 
 export default function PublicProductPage({
   params,

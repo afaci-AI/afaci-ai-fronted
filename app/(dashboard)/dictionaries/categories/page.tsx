@@ -8,19 +8,16 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { AppHeader } from '@/components/app-header'
-import { DataTable, type Column } from '@/components/data-table'
-import {
-  DictionaryFormDrawer,
-  type FormField,
-} from '@/components/dictionary-form-drawer'
-import { DeleteDialog } from '@/components/delete-dialog'
-import { useAuth } from '@/lib/auth-context'
-import { hasPermission } from '@/lib/types'
-import { categoriesApi } from '@/lib/api'
-import type { Category } from '@/lib/types'
+} from '@/shared/ui/card'
+import { Button } from '@/shared/ui/button'
+import { AppHeader } from '@/app/_shell/app-header'
+import { DataTable, type Column } from '@/shared/ui/data-table'
+import { DictionaryFormDrawer, type FormField } from '@/features/catalog'
+import { DeleteDialog } from '@/shared/ui/delete-dialog'
+import { useAuth } from '@/features/auth'
+import { hasPermission } from '@/shared/api/types'
+import { categoriesApi } from '@/features/catalog'
+import type { Category } from '@/shared/api/types'
 
 const columns: Column<Category>[] = [
   { key: 'name', label: 'Название', sortable: true },
