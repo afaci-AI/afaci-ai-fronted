@@ -1,0 +1,73 @@
+'use client'
+
+import { useCalculator } from './useCalculator'
+
+export function useCalculatorPage() {
+  const {
+    authLoading,
+    isAuthenticated,
+    references,
+    refId,
+    setRefId,
+    selectedRef,
+    products,
+    recipes,
+    rows,
+    result,
+    loading,
+    computing,
+    optimizing,
+    editing,
+    sum,
+    sumValid,
+    canCompute,
+    canOptimize,
+    usedIds,
+    REQUIRED_SUM,
+    costEnabled,
+    setCostEnabled,
+    totalCost,
+    addRow,
+    removeRow,
+    patchRow,
+    loadExample,
+    reset,
+    compute,
+    optimizeCost,
+  } = useCalculator()
+
+  return {
+    authLoading,
+    isAuthenticated,
+    references,
+    refId,
+    setRefId,
+    selectedRef,
+    products,
+    recipes,
+    rows,
+    result,
+    loading,
+    computing,
+    optimizing,
+    editing,
+    sum,
+    sumValid,
+    canCompute,
+    canOptimize,
+    usedIds,
+    REQUIRED_SUM,
+    costEnabled,
+    setCostEnabled,
+    totalCost,
+    addRow,
+    removeRow,
+    patchRow,
+    loadExample,
+    reset,
+    compute,
+    optimizeCost,
+  }
+}
+
+export type UseCalculatorPageVm = ReturnType<typeof useCalculatorPage>

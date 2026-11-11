@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { SiteHeader } from '@/components/site-header'
+import { SiteHeader } from '@/app/_shell/site-header'
 
 export default function SiteLayout({
   children,

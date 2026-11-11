@@ -8,11 +8,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Spinner } from '@/components/ui/spinner'
-import { SourceLink, normsApi } from '@/modules/norms'
-import type { Source } from '@/modules/norms'
+} from '@/shared/ui/card'
+import { Badge } from '@/shared/ui/badge'
+import { Spinner } from '@/shared/ui/spinner'
+import { SourceLink, normsApi } from '@/features/norms'
+import type { Source } from '@/features/norms'
 
 const KIND_LABELS: Record<string, string> = {
   article: 'Статья',

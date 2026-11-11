@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
-import { Toaster } from '@/components/ui/sonner'
-import { AuthProvider } from '@/lib/auth-context'
-import { cn } from '@/lib/utils'
+import { Toaster } from '@/shared/ui/sonner'
+import { AuthProvider } from '@/features/auth'
+import { cn } from '@/shared/lib/utils'
 import './globals.css'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
