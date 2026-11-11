@@ -8,6 +8,5 @@ node_modules
 *.log
 .env*.local
 README.md
-Dockerfile
-.dockerignore
+docker/
 pnpm-lock.yaml
