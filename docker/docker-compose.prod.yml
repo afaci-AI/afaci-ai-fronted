@@ -1,9 +1,10 @@
+# Запуск из корня репозитория: docker compose -f docker/docker-compose.prod.yml --project-directory . up --build -d
 name: afaci
 
 services:
   frontend:
     build:
-      dockerfile: Dockerfile.prod
+      dockerfile: docker/Dockerfile.prod
     restart: unless-stopped
     environment:
       BACKEND_URL: ${BACKEND_URL}
