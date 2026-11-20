@@ -101,7 +101,7 @@ export function CalculatorIngredients({ vm }: { vm: UseCalculatorPageVm }) {
         >
           <span>Сырьё</span>
           <span>Xᵢ, г</span>
-          {costEnabled && <span>Цена, сом/г</span>}
+          {costEnabled && <span>Цена, сом/кг</span>}
           <span />
         </div>
         {rows.map((row) => (
@@ -183,7 +183,7 @@ export function CalculatorIngredients({ vm }: { vm: UseCalculatorPageVm }) {
             <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground">Стоимость:</span>
               <span className="font-bold tabular-nums">
-                {totalCost !== null ? `${nf(totalCost, 2)} сом / 100 г` : '—'}
+                {totalCost !== null ? `${nf(totalCost, 2)} сом/кг` : '—'}
               </span>
             </div>
           )}
