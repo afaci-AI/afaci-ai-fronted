@@ -128,6 +128,9 @@ export interface ComputeResult {
 }
 
 export interface OptimizeResult {
+  /** Итоговая стоимость рецептуры, сом/кг; считает backend. */
+  total_cost_per_kg: number
+  /** @deprecated Оставлено для выпущенных клиентов; используйте total_cost_per_kg. */
   total_cost_per_100g: number
   optimal_items: CalcItem[]
   report: ComputeResult

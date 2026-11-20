@@ -134,11 +134,13 @@ export function useCalculator() {
     if (!costEnabled) return null
     const allPriced = rows.every((r) => r.price !== '')
     if (!allPriced) return null
-    return rows.reduce((s, r) => {
+    // Σ(Xᵢ·ценаᵢ) при Σ Xᵢ = 100 г даёт стоимость килограмма рецептуры.
+    const total = rows.reduce((s, r) => {
       const amt = parseFloat(r.amount.replace(',', '.')) || 0
       const price = parseFloat(r.price.replace(',', '.')) || 0
       return s + amt * price
     }, 0)
+    return total / 100
   }, [costEnabled, rows])
 
   const loadExample = () => {
@@ -231,7 +233,7 @@ export function useCalculator() {
         50,
       )
       toast.success(
-        `Оптимальная стоимость: ${res.total_cost_per_100g.toFixed(2)} сом / 100 г`,
+        `Оптимальная стоимость: ${res.total_cost_per_kg.toFixed(2)} сом/кг`,
       )
     } catch (e) {
       toast.error('Оптимизация не выполнена', {
