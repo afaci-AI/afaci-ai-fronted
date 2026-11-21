@@ -10,3 +10,5 @@ node_modules
 README.md
 docker/
 pnpm-lock.yaml
+*.tsbuildinfo
+coverage/
