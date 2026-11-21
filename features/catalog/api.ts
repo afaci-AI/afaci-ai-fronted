@@ -6,6 +6,7 @@ import type {
   Unit,
   NutrientType,
   NutrientName,
+  NutrientClass,
 } from '@/shared/api/types'
 
 export const categoriesApi = {
@@ -112,12 +113,23 @@ export const nutrientTypesApi = {
 export const nutrientNamesApi = {
   list: () => fetchApi<NutrientName[]>('/nutrient-names'),
   get: (id: string) => fetchApi<NutrientName>(`/nutrient-names/${id}`),
-  create: (data: { name: string; nutrient_type_id: string }) =>
+  create: (data: {
+    name: string
+    nutrient_type_id: string
+    nutrient_class?: NutrientClass
+  }) =>
     fetchApi<NutrientName>('/nutrient-names', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-  update: (id: string, data: { name?: string; nutrient_type_id?: string }) =>
+  update: (
+    id: string,
+    data: {
+      name?: string
+      nutrient_type_id?: string
+      nutrient_class?: NutrientClass
+    },
+  ) =>
     fetchApi<NutrientName>(`/nutrient-names/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),

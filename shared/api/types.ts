@@ -65,7 +65,10 @@ export interface NutrientName {
   id: string
   name: string
   nutrient_type_id: string
+  nutrient_class: NutrientClass
 }
+
+export type NutrientClass = 'macro' | 'micro' | 'amino' | 'other'
 
 export interface Product {
   id: string
