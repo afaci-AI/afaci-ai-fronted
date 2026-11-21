@@ -21,4 +21,23 @@ export const authApi = {
       body: JSON.stringify(data),
     }),
   me: () => fetchApi<AuthUser>('/auth/me'),
+  requestPasswordReset: (email: string) =>
+    fetchApi<{ status: string; message: string; resend_after?: number }>(
+      '/auth/password-reset/request',
+      { method: 'POST', body: JSON.stringify({ email }) },
+    ),
+  verifyPasswordReset: (data: { email: string; code: string }) =>
+    fetchApi<{ status: string }>('/auth/password-reset/verify', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  confirmPasswordReset: (data: {
+    email: string
+    code: string
+    new_password: string
+  }) =>
+    fetchApi<{ status: string }>('/auth/password-reset/confirm', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 }
