@@ -9,14 +9,14 @@ import {
   Bookmark,
   Sparkles,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/shared/ui/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from '@/shared/ui/card'
 
 // Основные инструменты приложения (требуют входа). Карточки кликабельны.
 const tools = [
@@ -25,7 +25,7 @@ const tools = [
     title: 'Калькулятор ценности',
     description:
       'Расчёт пищевой и биологической ценности рецептуры по методике Липатова: ' +
-      'макросостав, аминокислотный скор, БЦ, КРАС, V и G.',
+      'макросостав, аминокислотный скор, БЦ, КРАС, U и G.',
     href: '/calculator',
     cta: 'Открыть калькулятор',
   },
@@ -43,7 +43,7 @@ const tools = [
     title: 'Ранжирование рецептур',
     description:
       'Сравните сохранённые рецептуры и определите лучшую по показателям ' +
-      'БЦ, КРАС, V и G с градацией от лучшей к худшей.',
+      'БЦ, КРАС, U и G с градацией от лучшей к худшей.',
     href: '/ranking',
     cta: 'Перейти к ранжированию',
   },

@@ -8,20 +8,39 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { AppHeader } from '@/components/app-header'
-import { DataTable, type Column, type Filter } from '@/components/data-table'
-import {
-  DictionaryFormDrawer,
-  type FormField,
-} from '@/components/dictionary-form-drawer'
-import { DeleteDialog } from '@/components/delete-dialog'
-import { useAuth } from '@/lib/auth-context'
-import { hasPermission } from '@/lib/types'
-import { nutrientNamesApi, nutrientTypesApi } from '@/lib/api'
-import type { NutrientName, NutrientType } from '@/lib/types'
+} from '@/shared/ui/card'
+import { Button } from '@/shared/ui/button'
+import { Badge } from '@/shared/ui/badge'
+import { AppHeader } from '@/app/_shell/app-header'
+import { DataTable, type Column, type Filter } from '@/shared/ui/data-table'
+import { DictionaryFormDrawer, type FormField } from '@/features/catalog'
+import { DeleteDialog } from '@/shared/ui/delete-dialog'
+import { useAuth } from '@/features/auth'
+import { hasPermission } from '@/shared/api/types'
+import { nutrientNamesApi, nutrientTypesApi } from '@/features/catalog'
+import type {
+  NutrientClass,
+  NutrientName,
+  NutrientType,
+} from '@/shared/api/types'
+
+const CLASS_LABELS: Record<NutrientClass, string> = {
+  macro: 'Макросостав',
+  micro: 'Микросостав',
+  amino: 'Белок и аминокислоты',
+  other: 'Прочее',
+}
+
+const CLASS_OPTIONS = (Object.keys(CLASS_LABELS) as NutrientClass[]).map(
+  (value) => ({ value, label: CLASS_LABELS[value] }),
+)
+
+/** Класс уходит на backend, только если выбран; иначе берётся по типу. */
+function classField(data: Record<string, string>) {
+  return data.nutrient_class
+    ? { nutrient_class: data.nutrient_class as NutrientClass }
+    : {}
+}
 
 export default function NutrientNamesPage() {
   const { user } = useAuth()
@@ -68,6 +87,11 @@ export default function NutrientNamesPage() {
         return type ? <Badge variant="secondary">{type.name}</Badge> : '—'
       },
     },
+    {
+      key: 'nutrient_class',
+      label: 'Класс',
+      render: (item) => CLASS_LABELS[item.nutrient_class] ?? '—',
+    },
   ]
 
   const filters: Filter[] = [
@@ -94,6 +118,13 @@ export default function NutrientNamesPage() {
       required: true,
       options: nutrientTypes.map((t) => ({ value: t.id, label: t.name })),
     },
+    {
+      key: 'nutrient_class',
+      label: 'Класс',
+      type: 'select',
+      placeholder: 'По типу нутриента',
+      options: CLASS_OPTIONS,
+    },
   ]
 
   const handleEdit = (item: NutrientName) => {
@@ -114,11 +145,13 @@ export default function NutrientNamesPage() {
         await nutrientNamesApi.update(selectedItem.id, {
           name: data.name,
           nutrient_type_id: data.nutrient_type_id,
+          ...classField(data),
         })
       } else {
         await nutrientNamesApi.create({
           name: data.name,
           nutrient_type_id: data.nutrient_type_id,
+          ...classField(data),
         })
       }
       await loadData()

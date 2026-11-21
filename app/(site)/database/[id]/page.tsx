@@ -18,20 +18,21 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { ProductNutrientCharts } from '@/components/product-nutrient-charts'
+} from '@/shared/ui/card'
+import { Button } from '@/shared/ui/button'
+import { Spinner } from '@/shared/ui/spinner'
+import { ProductNutrientCharts } from '@/features/products'
+import { DailyNormsCard, normsApi } from '@/features/norms'
+import type { DailyNorms } from '@/features/norms'
+import { productsApi, nutrientsApi } from '@/features/products'
 import {
-  productsApi,
-  nutrientsApi,
   categoriesApi,
   subcategoriesApi,
   regionsApi,
   nutrientNamesApi,
   nutrientTypesApi,
   unitsApi,
-} from '@/lib/api'
+} from '@/features/catalog'
 import type {
   Product,
   Category,
@@ -41,7 +42,7 @@ import type {
   NutrientName,
   NutrientType,
   Unit,
-} from '@/lib/types'
+} from '@/shared/api/types'
 
 export default function PublicProductPage({
   params,
@@ -58,6 +59,7 @@ export default function PublicProductPage({
   const [nutrientNames, setNutrientNames] = useState<NutrientName[]>([])
   const [nutrientTypes, setNutrientTypes] = useState<NutrientType[]>([])
   const [units, setUnits] = useState<Unit[]>([])
+  const [norms, setNorms] = useState<DailyNorms | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -84,6 +86,11 @@ export default function PublicProductPage({
         setNutrientNames(names)
         setNutrientTypes(types)
         setUnits(uns)
+        // Нормы дополняют карточку: их сбой не мешает показу самого продукта.
+        normsApi
+          .product(id)
+          .then(setNorms)
+          .catch(() => setNorms(null))
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Ошибка загрузки')
       } finally {
@@ -212,6 +219,8 @@ export default function PublicProductPage({
             units={units}
           />
         )}
+
+        {norms && <DailyNormsCard data={norms} subject="продукта" />}
       </div>
     </div>
   )

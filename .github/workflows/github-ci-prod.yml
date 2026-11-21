@@ -45,7 +45,7 @@ jobs:
           DOCKER_BUILDKIT: "1"
         run: |
           docker build \
-            -f Dockerfile.prod \
+            -f docker/Dockerfile.prod \
             -t afaci-ai-frontend:${{ env.TAG_NAME }} \
             -t afaci-ai-frontend:prod \
             .
@@ -121,7 +121,7 @@ jobs:
           git checkout --detach "refs/tags/$TAG_NAME"
   
           echo "Deploying containers..."
-          docker compose -f docker-compose.prod.yml up --build -d
+          docker compose -f docker/docker-compose.prod.yml --project-directory . up --build -d
   
           echo "Deployment completed."
           REMOTE

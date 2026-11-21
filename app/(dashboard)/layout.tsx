@@ -2,9 +2,9 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
-import { AppSidebar } from '@/components/app-sidebar'
-import { useAuth } from '@/lib/auth-context'
+import { SidebarProvider, SidebarInset } from '@/shared/ui/sidebar'
+import { AppSidebar } from '@/app/_shell/app-sidebar'
+import { useAuth } from '@/features/auth'
 
 export default function DashboardLayout({
   children,
