@@ -41,17 +41,19 @@ export function NormsInfoButton({ data }: { data: DailyNorms }) {
               Как получена каждая норма
             </p>
             <ul className="space-y-2">
-              {data.norms.map((row) => (
-                <li key={row.key}>
-                  <span className="font-medium">{row.name}</span>
-                  {row.basis ? (
-                    <span className="text-muted-foreground">
-                      {' '}
-                      — {row.basis}
-                    </span>
-                  ) : null}
-                </li>
-              ))}
+              {[...data.macro, ...data.micro.filter((row) => row.basis)].map(
+                (row) => (
+                  <li key={row.key}>
+                    <span className="font-medium">{row.name}</span>
+                    {row.basis ? (
+                      <span className="text-muted-foreground">
+                        {' '}
+                        — {row.basis}
+                      </span>
+                    ) : null}
+                  </li>
+                ),
+              )}
             </ul>
           </div>
           {data.sources.length > 0 ? (
