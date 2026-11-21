@@ -1,6 +1,6 @@
 'use client'
 
-import { MoreHorizontal, Pencil, Power } from 'lucide-react'
+import { Mail, MoreHorizontal, Pencil, Power } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Badge } from '@/shared/ui/badge'
 import {
@@ -34,6 +34,7 @@ export function UsersTable({ vm }: { vm: UseUsersAdminVm }) {
     filteredUsers,
     handleOpenDrawer,
     handleToggleStatus,
+    handleResendCredentials,
   } = vm
   return (
     <div className="rounded-md border">
@@ -85,6 +86,11 @@ export function UsersTable({ vm }: { vm: UseUsersAdminVm }) {
                       <p className="text-sm text-muted-foreground">
                         {user.email}
                       </p>
+                      {user.mustChangePassword && (
+                        <Badge variant="outline" className="mt-1">
+                          Ждёт первого входа
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </TableCell>
@@ -137,6 +143,14 @@ export function UsersTable({ vm }: { vm: UseUsersAdminVm }) {
                         <Pencil className="mr-2 h-4 w-4" />
                         Редактировать
                       </DropdownMenuItem>
+                      {user.mustChangePassword && user.isActive && (
+                        <DropdownMenuItem
+                          onClick={() => handleResendCredentials(user)}
+                        >
+                          <Mail className="mr-2 h-4 w-4" />
+                          Выслать новый временный пароль
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         onClick={() => handleToggleStatus(user)}
                         disabled={user.id === currentUser?.id}

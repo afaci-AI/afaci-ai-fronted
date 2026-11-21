@@ -8,6 +8,7 @@ export interface AuthUser {
   isActive: boolean
   createdAt: string
   lastLoginAt?: string | null
+  mustChangePassword?: boolean
 }
 export interface AuthResponse {
   access_token: string
@@ -21,6 +22,11 @@ export const authApi = {
       body: JSON.stringify(data),
     }),
   me: () => fetchApi<AuthUser>('/auth/me'),
+  changePassword: (data: { current_password: string; new_password: string }) =>
+    fetchApi<{ status: string }>('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   requestPasswordReset: (email: string) =>
     fetchApi<{ status: string; message: string; resend_after?: number }>(
       '/auth/password-reset/request',

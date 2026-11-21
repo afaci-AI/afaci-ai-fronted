@@ -82,22 +82,11 @@ export function UserFormSheet({ vm }: { vm: UseUsersAdminVm }) {
             </Field>
 
             {!selectedUser && (
-              <Field>
-                <FieldLabel>Временный пароль *</FieldLabel>
-                <Input
-                  type="text"
-                  placeholder="Минимум 6 символов"
-                  value={formData.password}
-                  onChange={(e) => handleChange('password', e.target.value)}
-                  aria-invalid={!!errors.password}
-                />
-                {errors.password && (
-                  <FieldMessage variant="error">{errors.password}</FieldMessage>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Пользователю потребуется сменить пароль при первом входе.
-                </p>
-              </Field>
+              <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+                Пароль задавать не нужно: система создаст временный и отправит
+                его вместе с логином на указанный email. При первом входе
+                пользователь задаст собственный пароль.
+              </p>
             )}
 
             <Field>
