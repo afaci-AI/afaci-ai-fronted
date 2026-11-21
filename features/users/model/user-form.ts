@@ -51,7 +51,6 @@ export function toDatetimeLocalValue(iso: string | null): string {
 export interface UserFormData {
   name: string
   email: string
-  password: string
   role: UserRole
   unlimited: boolean
   accessExpiresAt: string
@@ -60,7 +59,6 @@ export interface UserFormData {
 export const emptyForm: UserFormData = {
   name: '',
   email: '',
-  password: '',
   role: 'viewer',
   unlimited: true,
   accessExpiresAt: '',

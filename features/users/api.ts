@@ -9,18 +9,28 @@ export interface AdminUser {
   isActive: boolean
   accessExpiresAt: string | null
   mustChangePassword: boolean
+  temporaryPasswordExpiresAt?: string | null
   status: UserStatus
   createdAt: string
   lastLoginAt: string | null
 }
 
+/** Результат отправки письма с данными для входа — отдельно от создания. */
+export interface CredentialsEmail {
+  sent: boolean
+  error: string | null
+}
+
+export type AdminUserWithEmail = AdminUser & {
+  credentialsEmail: CredentialsEmail
+}
+
+/** Пароль задаёт сервер: временный пароль уходит пользователю письмом. */
 export interface UserCreateData {
   email: string
   name: string
-  password: string
   role: UserRole
   access_expires_at?: string | null
-  must_change_password?: boolean
 }
 
 export interface UserUpdateData {
@@ -41,7 +51,7 @@ export const usersApi = {
   },
   get: (id: string) => fetchApi<AdminUser>(`/users/${id}`),
   create: (data: UserCreateData) =>
-    fetchApi<AdminUser>('/users', {
+    fetchApi<AdminUserWithEmail>('/users', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -49,6 +59,10 @@ export const usersApi = {
     fetchApi<AdminUser>(`/users/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
+    }),
+  resendCredentials: (id: string) =>
+    fetchApi<AdminUserWithEmail>(`/users/${id}/resend-credentials`, {
+      method: 'POST',
     }),
   deactivate: (id: string) =>
     fetchApi<{ status: string }>(`/users/${id}`, { method: 'DELETE' }),

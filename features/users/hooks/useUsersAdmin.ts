@@ -75,7 +75,6 @@ export function useUsersAdmin() {
       setFormData({
         name: user.name,
         email: user.email,
-        password: '',
         role: user.role,
         unlimited: !user.accessExpiresAt,
         accessExpiresAt: toDatetimeLocalValue(user.accessExpiresAt),
@@ -113,9 +112,6 @@ export function useUsersAdmin() {
     if (!selectedUser && users.some((u) => u.email === formData.email)) {
       newErrors.email = 'Пользователь с таким email уже существует'
     }
-    if (!selectedUser && formData.password.trim().length < 6) {
-      newErrors.password = 'Пароль должен быть не короче 6 символов'
-    }
     if (!formData.unlimited && !formData.accessExpiresAt) {
       newErrors.accessExpiresAt = 'Укажите дату окончания доступа'
     } else if (
@@ -151,22 +147,41 @@ export function useUsersAdmin() {
         setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)))
         toast.success('Пользователь обновлён')
       } else {
-        const created = await usersApi.create({
+        const { credentialsEmail, ...created } = await usersApi.create({
           email: formData.email,
           name: formData.name,
-          password: formData.password,
           role: formData.role,
           access_expires_at: accessExpiresAtIso,
-          must_change_password: true,
         })
         setUsers((prev) => [created, ...prev])
-        toast.success('Пользователь создан')
+        if (credentialsEmail.sent) {
+          toast.success('Пользователь создан', {
+            description: `Логин и временный пароль отправлены на ${created.email}`,
+          })
+        } else {
+          toast.warning('Пользователь создан, но письмо не отправлено', {
+            description: `${credentialsEmail.error ?? ''} Повторите отправку из меню пользователя.`,
+            duration: 10000,
+          })
+        }
       }
       setDrawerOpen(false)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Произошла ошибка')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleResendCredentials = async (user: AdminUser) => {
+    try {
+      const updated = await usersApi.resendCredentials(user.id)
+      setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)))
+      toast.success('Новый временный пароль отправлен', {
+        description: `Письмо ушло на ${updated.email}; прежний пароль больше не действует.`,
+      })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Произошла ошибка')
     }
   }
 
@@ -221,6 +236,7 @@ export function useUsersAdmin() {
     validate,
     handleSave,
     handleToggleStatus,
+    handleResendCredentials,
   }
 }
 

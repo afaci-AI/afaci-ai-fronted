@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/shared/ui/sonner'
-import { AuthProvider } from '@/features/auth'
+import { AuthProvider, PasswordChangeGuard } from '@/features/auth'
 import { cn } from '@/shared/lib/utils'
 import './globals.css'
 
@@ -51,6 +51,7 @@ export default function RootLayout({
         )}
       >
         <AuthProvider>
+          <PasswordChangeGuard />
           {children}
           <Toaster />
         </AuthProvider>
