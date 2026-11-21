@@ -19,6 +19,8 @@ interface AuthContextType {
   isLoading: boolean
   login: (email: string, password: string) => Promise<boolean>
   logout: () => void
+  /** После смены временного пароля снимает ограничение первого входа. */
+  markPasswordChanged: () => void
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -33,6 +35,7 @@ function toUser(u: AuthUser): User {
     isActive: u.isActive,
     createdAt: u.createdAt,
     lastLoginAt: u.lastLoginAt ?? undefined,
+    mustChangePassword: u.mustChangePassword ?? false,
   }
 }
 
@@ -105,6 +108,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }, [])
 
+  const markPasswordChanged = useCallback(() => {
+    setUser((prev) => {
+      if (!prev) return prev
+      const next = { ...prev, mustChangePassword: false }
+      window.localStorage.setItem(USER_KEY, JSON.stringify(next))
+      return next
+    })
+  }, [])
+
   // Сервер вернул 401 на аутентифицированном запросе (истёк срок доступа/токен) — разлогиниваем на фронте.
   useEffect(() => {
     function handleSessionExpired() {
@@ -123,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         login,
         logout,
+        markPasswordChanged,
       }}
     >
       {children}
