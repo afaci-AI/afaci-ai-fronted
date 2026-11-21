@@ -26,7 +26,14 @@ export function NormRows({
     <TableBody>
       {rows.map((row) => (
         <TableRow key={row.key}>
-          <TableCell className="font-medium">{row.name}</TableCell>
+          <TableCell className="font-medium">
+            {row.name}
+            {row.kind === 'adequate' ? (
+              <span className="text-muted-foreground block text-xs font-normal">
+                адекватный уровень
+              </span>
+            ) : null}
+          </TableCell>
           <TableCell className="text-right tabular-nums">
             {row.amount === null ? (
               '—'

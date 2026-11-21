@@ -92,7 +92,9 @@ export function MicroCard({
       <CardHeader>
         <CardTitle className="text-lg">Микросостав</CardTitle>
         <CardDescription>
-          Минеральный состав: содержание в 100 г {subject}
+          Минеральный состав: содержание в 100 г {subject} и доля от усреднённой
+          суточной нормы; для кобальта и ванадия — от адекватного уровня
+          потребления
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
