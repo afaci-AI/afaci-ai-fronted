@@ -1,6 +1,7 @@
 'use client'
 
 import { Suspense, useState } from 'react'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Database, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
@@ -73,7 +74,15 @@ function LoginInner() {
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="password">Пароль</FieldLabel>
+                <div className="flex items-center justify-between">
+                  <FieldLabel htmlFor="password">Пароль</FieldLabel>
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                  >
+                    Забыли пароль?
+                  </Link>
+                </div>
                 <div className="relative">
                   <Input
                     id="password"
