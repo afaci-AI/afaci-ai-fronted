@@ -3,7 +3,7 @@
 import { AlertTriangle, Check, Zap } from 'lucide-react'
 import { nf } from '../model/utils'
 import type { ComputeResult } from '../api'
-import { DailyNormsCard } from '@/features/norms'
+import { DailyNormsCard, OtherCard } from '@/features/norms'
 import { StatCard } from './StatCard'
 import { useResultsView } from '../hooks/useResultsView'
 import { RecipeCompositionCard } from './RecipeCompositionCard'
@@ -79,7 +79,11 @@ export function Results({ result }: { result: ComputeResult }) {
       {result.verdict && <VerdictCard verdict={result.verdict} />}
 
       {result.daily_norms && (
-        <DailyNormsCard data={result.daily_norms} subject="рецептуры" />
+        <DailyNormsCard
+          data={result.daily_norms}
+          subject="рецептуры"
+          withOther={false}
+        />
       )}
 
       <RecipeCompositionCard vm={vm} />
@@ -89,6 +93,10 @@ export function Results({ result }: { result: ComputeResult }) {
       <QualityIndicatorsCard vm={vm} />
 
       <AminoDetailsCard vm={vm} />
+
+      {result.daily_norms && (
+        <OtherCard rows={result.daily_norms.other} subject="рецептуры" />
+      )}
     </div>
   )
 }
