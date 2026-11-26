@@ -34,12 +34,6 @@ const noFeatures = {
   message: 'shared/ не зависит от фич.',
 }
 
-// TEMP: reports-temp — на временную фичу не ссылается никто, кроме её страницы в app/.
-const noReportsTemp = {
-  group: ['@/features/reports-temp'],
-  message: 'TEMP: фича reports-temp временная; импортировать её нельзя.',
-}
-
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -51,17 +45,12 @@ const eslintConfig = defineConfig([
   },
   {
     files: ['features/**'],
-    rules: { 'no-restricted-imports': restrict(noApp, noReportsTemp) },
-  },
-  {
-    // Сама временная фича может ссылаться на себя через собственный index.
-    files: ['features/reports-temp/**'],
     rules: { 'no-restricted-imports': restrict(noApp) },
   },
   {
     files: ['shared/**'],
     rules: {
-      'no-restricted-imports': restrict(noApp, noFeatures, noReportsTemp),
+      'no-restricted-imports': restrict(noApp, noFeatures),
     },
   },
   {
