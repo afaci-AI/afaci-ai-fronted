@@ -4,7 +4,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useAuth } from '@/features/auth'
-import { reportsTempApi, type LookupProduct, type ReportOptions } from '../api'
+import {
+  reportsTempApi,
+  type LookupProduct,
+  type ReportOptions,
+  type SavedRecipeOption,
+} from '../api'
 import {
   buildRequest,
   emptyForm,
@@ -22,6 +27,7 @@ export function useReportsTemp() {
   const [options, setOptions] = useState<ReportOptions | null>(null)
   const [candidates, setCandidates] = useState<LookupProduct[]>([])
   const [picked, setPicked] = useState<LookupProduct | null>(null)
+  const [recipes, setRecipes] = useState<SavedRecipeOption[]>([])
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
@@ -30,6 +36,10 @@ export function useReportsTemp() {
       .options()
       .then(setOptions)
       .catch((e: Error) => toast.error(e.message))
+    reportsTempApi
+      .recipes()
+      .then(setRecipes)
+      .catch(() => setRecipes([]))
   }, [isAuthenticated])
 
   const search = form.name.trim()
@@ -120,6 +130,7 @@ export function useReportsTemp() {
     form,
     update,
     options,
+    recipes,
     candidates,
     picked,
     subcategoryNames,

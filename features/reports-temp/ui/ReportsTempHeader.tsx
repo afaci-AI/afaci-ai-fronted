@@ -11,8 +11,8 @@ export function ReportsTempHeader() {
         <Badge variant="outline">временно</Badge>
       </h1>
       <p className="mt-2 text-muted-foreground">
-        Выборка сырья из базы по критериям в формате PDF. Раздел временный и
-        будет удалён.
+        Выборка сырья из базы по критериям и пищевая ценность сохранённой
+        рецептуры в формате PDF. Раздел учебный, на ветке education.
       </p>
     </div>
   )

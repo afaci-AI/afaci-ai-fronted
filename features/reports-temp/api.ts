@@ -26,6 +26,11 @@ export interface LookupProduct {
   region: string
 }
 
+export interface SavedRecipeOption {
+  id: string
+  name: string
+}
+
 export type PdfParams = Record<string, string | number | boolean | undefined>
 
 export const reportsTempApi = {
@@ -35,6 +40,8 @@ export const reportsTempApi = {
     fetchApi<LookupProduct[]>(
       `/reports-temp/products/lookup?name=${encodeURIComponent(name)}`,
     ),
+
+  recipes: () => fetchApi<SavedRecipeOption[]>('/reports-temp/recipes'),
 
   // PDF приходит бинарным, поэтому fetchApi (он читает JSON) здесь не подходит.
   async pdf(path: string, params: PdfParams): Promise<Blob> {

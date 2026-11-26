@@ -7,9 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { kindHints, kindTitles, type ReportKind } from '../model/report-form'
 import type { UseReportsTempVm } from '../hooks/useReportsTemp'
-import { CardFields, ListFields, RankingFields } from './CriteriaFields'
+import {
+  CardFields,
+  ListFields,
+  NutritionFields,
+  RankingFields,
+} from './CriteriaFields'
 
-const KINDS: ReportKind[] = ['list', 'ranking', 'card']
+const KINDS: ReportKind[] = ['list', 'ranking', 'card', 'nutrition']
 
 export function ReportBuilderCard({ vm }: { vm: UseReportsTempVm }) {
   const { kind, setKind, busy, run } = vm
@@ -33,6 +38,7 @@ export function ReportBuilderCard({ vm }: { vm: UseReportsTempVm }) {
         {kind === 'list' && <ListFields vm={vm} />}
         {kind === 'ranking' && <RankingFields vm={vm} />}
         {kind === 'card' && <CardFields vm={vm} />}
+        {kind === 'nutrition' && <NutritionFields vm={vm} />}
         <div className="flex flex-wrap gap-3">
           <Button disabled={busy} onClick={() => run('download')}>
             {busy ? (

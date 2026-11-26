@@ -1,7 +1,7 @@
 // TEMP: reports-temp
 import type { PdfParams } from '../api'
 
-export type ReportKind = 'list' | 'ranking' | 'card'
+export type ReportKind = 'list' | 'ranking' | 'card' | 'nutrition'
 
 export interface ReportForm {
   category: string
@@ -12,6 +12,7 @@ export interface ReportForm {
   order: 'desc' | 'asc'
   top: string
   productId: string
+  recipeId: string
 }
 
 export const ANY = '__any__'
@@ -26,12 +27,14 @@ export const emptyForm: ReportForm = {
   order: 'desc',
   top: '20',
   productId: '',
+  recipeId: '',
 }
 
 export const kindTitles: Record<ReportKind, string> = {
   list: 'Перечень сырья',
   ranking: 'Рейтинг по нутриенту',
   card: 'Карточка сырья',
+  nutrition: 'Пищевая ценность рецептуры',
 }
 
 export const kindHints: Record<ReportKind, string> = {
@@ -39,6 +42,8 @@ export const kindHints: Record<ReportKind, string> = {
   ranking:
     'Топ сырья по выбранному нутриенту — по убыванию или по возрастанию (до 100 позиций).',
   card: 'Полный состав одного продукта по группам: химический, аминокислотный, минеральный.',
+  nutrition:
+    'Сохранённая рецептура: белок, жир, углеводы, энергоценность и аминокислотный скор на 100 г.',
 }
 
 export function parseTop(value: string): number | null {
@@ -55,6 +60,7 @@ export function validate(kind: ReportKind, form: ReportForm): string | null {
       return `N должно быть целым числом от 1 до ${MAX_TOP}.`
   }
   if (kind === 'card' && !form.productId) return 'Выберите продукт.'
+  if (kind === 'nutrition' && !form.recipeId) return 'Выберите рецептуру.'
   return null
 }
 
@@ -74,6 +80,9 @@ export function buildRequest(kind: ReportKind, form: ReportForm): PdfRequest {
         category: form.category,
       },
     }
+  }
+  if (kind === 'nutrition') {
+    return { path: `/recipes/${form.recipeId}/nutrition.pdf`, params: {} }
   }
   if (kind === 'card') {
     return { path: `/products/${form.productId}.pdf`, params: {} }

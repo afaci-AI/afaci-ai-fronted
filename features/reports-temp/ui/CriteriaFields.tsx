@@ -196,3 +196,31 @@ export function CardFields({ vm }: { vm: UseReportsTempVm }) {
     </div>
   )
 }
+
+export function NutritionFields({ vm }: { vm: UseReportsTempVm }) {
+  const { form, update, recipes } = vm
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor="rt-recipe">Рецептура</Label>
+      <Select
+        value={form.recipeId}
+        onValueChange={(recipeId) => update({ recipeId })}
+      >
+        <SelectTrigger id="rt-recipe" className="w-full">
+          <SelectValue
+            placeholder={
+              recipes.length ? 'Выберите рецептуру' : 'Нет сохранённых рецептур'
+            }
+          />
+        </SelectTrigger>
+        <SelectContent>
+          {recipes.map((r) => (
+            <SelectItem key={r.id} value={r.id}>
+              {r.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
