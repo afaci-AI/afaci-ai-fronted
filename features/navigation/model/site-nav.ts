@@ -10,7 +10,6 @@ export const baseNavItems = [
 export const authNavItems = [
   { label: 'Мои рецептуры', href: '/saved-recipes' },
   { label: 'Ранжирование', href: '/ranking' },
-  { label: 'Отчёты (временно)', href: '/reports-temp' }, // TEMP: reports-temp
 ]
 
 export function isActive(pathname: string, href: string) {
